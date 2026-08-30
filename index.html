@@ -338,6 +338,35 @@ function guardarDatoJSON(clave, objeto){
   const texto = JSON.stringify(objeto);
   guardarDato(clave, texto);
 }
+  // Guardar dato como pendiente si no hay conexión
+function agregarPendiente(clave, valor) {
+  let pendientes = JSON.parse(localStorage.getItem("pendientes") || "[]");
+  pendientes.push({ clave: clave, valor: valor });
+  localStorage.setItem("pendientes", JSON.stringify(pendientes));
+}
+
+// Subir todos los pendientes a Firebase
+function subirPendientes() {
+  const pendientes = localStorage.getItem("pendientes");
+  if (!pendientes) return;
+
+  try {
+    const lista = JSON.parse(pendientes);
+    lista.forEach(function(item) {
+      db.ref("datos/" + item.clave).set(item.valor);
+    });
+    localStorage.removeItem("pendientes");
+    console.log("✅ Datos pendientes subidos a Firebase");
+  } catch(e) {
+    console.log("Error al subir pendientes:", e);
+  }
+}
+
+// Cuando vuelva el internet → subir automáticamente
+window.addEventListener('online', subirPendientes);
+// También revisar al abrir la página
+subirPendientes();
+  
 function cargarDato(clave, defecto=null){
   const local = localStorage.getItem(clave);
   return local !== null ? local : defecto;
