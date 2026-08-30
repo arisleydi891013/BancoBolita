@@ -318,6 +318,13 @@ function vigilarConexion(){
       el.className = "estado-conexion sin-conexion";
     }
   });
+  db.ref("datos").on("value", function(snapshot) {
+  const datos = snapshot.val();
+  if (datos) {
+    console.log("Datos cargados:", datos);
+  }
+});
+  
 }
 function guardarDato(clave, valor){
   localStorage.setItem(clave, valor);
