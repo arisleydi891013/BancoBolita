@@ -350,7 +350,22 @@ function agregarPendiente(clave, valor) {
   pendientes.push({ clave: clave, valor: valor });
   localStorage.setItem("pendientes", JSON.stringify(pendientes));
 }
+  function subirPendientes() {
+  const pendientes = localStorage.getItem("pendientes");
+  if (!pendientes) return;
 
+  try {
+    const lista = JSON.parse(pendientes);
+    lista.forEach(function(item) {
+      db.ref("datos/" + item.clave).set(item.valor);
+    });
+    localStorage.removeItem("pendientes");
+    console.log("✅ Datos pendientes subidos a Firebase");
+  } catch(e) {
+    console.log("Error al subir pendientes:", e);
+  }
+  }
+  
 // Subir todos los pendientes a Firebase
 function subirPendientes() {
   const pendientes = localStorage.getItem("pendientes");
@@ -715,7 +730,11 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
-
+// Subir pendientes automáticamente cuando vuelva el internet
+window.addEventListener('online', subirPendientes);
+// También revisar al abrir la página
+subirPendientes();
+  
 </script>
 </body>
 </html>
