@@ -393,6 +393,7 @@ function entrarAdmin(){
     listarUsuarios(); document.getElementById("claveAdmin").value = "";
   } else { mostrarMensaje("mensajeAdmin", "❌ Contraseña incorrecta", "error"); }
 }
+  }
 function volverPanelAdmin(){ ocultarTodo(); document.getElementById("pantallaPanelAdmin").classList.add("pantalla-activa"); }
 function irResumenAdmin(){ ocultarTodo(); document.getElementById("pantallaResumenAdmin").classList.add("pantalla-activa"); document.getElementById("fechaResumenAdmin").value = fechaActual; }
   function guardarResumenUsuario(usuario, fecha, fondoInicial, totalRecogido, totalPagado, ajuste){
