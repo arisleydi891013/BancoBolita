@@ -1,0 +1,11 @@
+{
+  "background_color": "rgb(0, 0, 0)",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Bolita",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "BancoBolita",
+  "start_url": "/",
+  "theme_color": "#ffffff"
+}
