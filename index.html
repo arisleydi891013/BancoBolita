@@ -331,9 +331,15 @@ function vigilarConexion(){
 function guardarDato(clave, valor){
   localStorage.setItem(clave, valor);
   if(conexionActiva && typeof db !== 'undefined'){
-    db.ref("datos/"+clave).set(valor).catch(()=>{});
+    db.ref("datos/"+clave).set(valor)
+      .catch(function(){
+        agregarPendiente(clave, valor);
+      });
+  } else {
+    agregarPendiente(clave, valor);
   }
 }
+  
 function guardarDatoJSON(clave, objeto){
   const texto = JSON.stringify(objeto);
   guardarDato(clave, texto);
