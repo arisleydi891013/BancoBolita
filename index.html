@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Banco de Bolita - Sistema Completo</title>
+<title>Banco de Bolita - Sistema con Accesos</title>
 <link rel="manifest" href="manifest.json">
-  
+
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -15,6 +15,7 @@ const firebaseConfig = {
   authDomain: "bancobolita-b39aa.firebaseapp.com",
   projectId: "bancobolita-b39aa",
   databaseURL: "https://bancobolita-b39aa-default-rtdb.firebaseio.com",
+
   storageBucket: "bancobolita-b39aa.firebasestorage.app",
   messagingSenderId: "1012596382923",
   appId: "1:1012596382923:web:998803ba4d4fec80f64f4e"
@@ -77,8 +78,6 @@ label{font-weight:bold;display:block;margin-top:8px;}
 .estado-conexion{position:fixed;top:4px;right:4px;padding:4px 10px;border-radius:20px;font-size:13px;font-weight:bold;z-index:999;}
 .conectado{background:#e8f5e9;color:green;}
 .sin-conexion{background:#ffebee;color:red;}
-.fila{display:flex;gap:10px;flex-wrap:wrap;}
-.fila>div{flex:1;min-width:140px;}
 </style>
 </head>
 <body>
@@ -96,7 +95,8 @@ label{font-weight:bold;display:block;margin-top:8px;}
     <button class="gris pequeño" onclick="irAdmin()">🔧 Administrador</button>
   </div>
 </div>
-  <div id="pantallaAdmin" class="pantalla">
+
+<div id="pantallaAdmin" class="pantalla">
   <div class="login-caja">
     <h2>🔧 ACCESO DE ADMINISTRADOR</h2>
     <label>Contraseña de Administrador</label>
@@ -116,22 +116,22 @@ label{font-weight:bold;display:block;margin-top:8px;}
     <label>Contraseña</label>
     <input id="nuevaClave" type="password" placeholder="Escribe una clave">
     
-    <div class="fila">
-      <div>
+    <div class="fila" style="display:flex;gap:10px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:140px;">
         <label>🎯 Precio Fijo ($)</label>
         <input type="number" id="precioFijo" value="75" min="1" step="1">
       </div>
-      <div>
+      <div style="flex:1;min-width:140px;">
         <label>🏃 Precio Corrido ($)</label>
         <input type="number" id="precioCorrido" value="25" min="1" step="1">
       </div>
     </div>
-    <div class="fila">
-      <div>
+    <div class="fila" style="display:flex;gap:10px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:140px;">
         <label>📍 Multiplicador Posición</label>
         <input type="number" id="multiPosicion" value="5" min="1" step="1">
       </div>
-      <div>
+      <div style="flex:1;min-width:140px;">
         <label>🔗 Factor Parlé ($)</label>
         <input type="number" id="factorParle" value="1100" min="1" step="1">
       </div>
@@ -147,10 +147,10 @@ label{font-weight:bold;display:block;margin-top:8px;}
     <div id="listaUsuarios"></div>
   </div>
   <button class="azul" onclick="irResumenAdmin()">📊 RESUMEN GENERAL DE TODOS LOS USUARIOS</button>
-  
+
 <button class="amarillo" onclick="irContabilidadDiaria()">📒 CONTABILIDAD DIARIA</button>
 </div>
-  
+
 </div>
 
 <div id="pantallaResumenAdmin" class="pantalla">
@@ -243,7 +243,8 @@ label{font-weight:bold;display:block;margin-top:8px;}
     <h2 style="text-align:center;color:#e65100;margin-top:0;">💰 FONDO GENERAL CON PORCENTAJE</h2>
     <div class="resumen-fila">
       <label>🏦 Fondo General Anterior:</label>
-      <span id="fgAnterior">$0.00</span>
+      <input type="number" step="0.01" id="fgAnterior" placeholder="0.00" style="width:140px;padding:6px;">
+
     </div>
     <div class="resumen-fila">
       <label>📊 Porcentaje a aplicar (%):</label>
@@ -265,9 +266,9 @@ label{font-weight:bold;display:block;margin-top:8px;}
 
   <button class="verde" onclick="guardarContabilidad()">💾 GUARDAR TODO</button>
   <button class="azul" onclick="exportarContabilidadExcel()">📥 EXPORTAR A EXCEL</button>
-  
+
 </div>
-  
+
 <div id="sistemaPrincipal" class="pantalla">
   <button class="gris" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
   <div class="fecha-info" id="usuarioActivo"></div>
@@ -329,7 +330,8 @@ label{font-weight:bold;display:block;margin-top:8px;}
   <div id="jugadas"></div>
   <div class="total">💰 TOTAL RECOGIDO: $<span id="total">0.00</span></div>
 </div>
-  <div id="pantallaResultados" class="pantalla">
+
+<div id="pantallaResultados" class="pantalla">
   <h1>🏆 RESULTADOS</h1>
   <div class="fecha-info" id="fechaResultados"></div>
   <button class="gris" onclick="volverInicio()">⬅️ VOLVER AL INICIO</button>
@@ -366,7 +368,7 @@ label{font-weight:bold;display:block;margin-top:8px;}
   <div class="fecha-info" id="fechaResumen"></div>
   <button class="gris" onclick="volverInicio()">⬅️ VOLVER AL INICIO</button>
   <div class="resumen-cuadro">
-    <div class="resumen-fila">
+    <div class="resumen-fila fila-fondo-inicial">
       <label>📦 Fondo inicial del día:</label>
       <input type="number" step="0.01" id="fondoInicial" placeholder="Se arrastra del día anterior">
     </div>
@@ -405,7 +407,6 @@ label{font-weight:bold;display:block;margin-top:8px;}
     <div id="listaFechas"></div>
   </div>
 </div>
-
 <script>
 const CLAVE_ADMIN = "admin123";
 let usuarioActual = null;
@@ -434,7 +435,7 @@ function vigilarConexion(){
     console.log("Datos cargados:", datos);
   }
 });
-  
+
 }
 function guardarDato(clave, valor){
   localStorage.setItem(clave, valor);
@@ -447,7 +448,7 @@ function guardarDato(clave, valor){
     agregarPendiente(clave, valor);
   }
 }
-  
+
 function guardarDatoJSON(clave, objeto){
   const texto = JSON.stringify(objeto);
   guardarDato(clave, texto);
@@ -472,8 +473,9 @@ function agregarPendiente(clave, valor) {
   } catch(e) {
     console.log("Error al subir pendientes:", e);
   }
-  }
-  
+}
+
+
 // Subir todos los pendientes a Firebase
 function subirPendientes() {
   const pendientes = localStorage.getItem("pendientes");
@@ -495,7 +497,7 @@ function subirPendientes() {
 window.addEventListener('online', subirPendientes);
 // También revisar al abrir la página
 subirPendientes();
-  
+
 function cargarDato(clave, defecto=null){
   const local = localStorage.getItem(clave);
   return local !== null ? local : defecto;
@@ -560,10 +562,9 @@ function entrarAdmin(){
     listarUsuarios(); document.getElementById("claveAdmin").value = "";
   } else { mostrarMensaje("mensajeAdmin", "❌ Contraseña incorrecta", "error"); }
 }
-
 function volverPanelAdmin(){ ocultarTodo(); document.getElementById("pantallaPanelAdmin").classList.add("pantalla-activa"); }
 function irResumenAdmin(){ ocultarTodo(); document.getElementById("pantallaResumenAdmin").classList.add("pantalla-activa"); document.getElementById("fechaResumenAdmin").value = fechaActual; }
-  function guardarResumenUsuario(usuario, fecha, fondoInicial, totalRecogido, totalPagado, ajuste){
+function guardarResumenUsuario(usuario, fecha, fondoInicial, totalRecogido, totalPagado, ajuste){
   var clave = usuario + "_bolita_resumen_" + fecha;
   var resultado = (Number(fondoInicial)||0)+(Number(totalRecogido)||0)-(Number(totalPagado)||0)+(Number(ajuste)||0);
   guardarDatoJSON(clave, {fecha:fecha,fondoInicial:Number(fondoInicial)||0,totalRecogido:Number(totalRecogido)||0,totalPagado:Number(totalPagado)||0,ajuste:Number(ajuste)||0,fondoFinal:resultado});
@@ -778,7 +779,7 @@ function calcularParle(){
   var res=[String(r.fijo).trim(),String(r.corrido1).trim(),String(r.corrido2).trim()], tot=0, html="", dias=["Mañana","Noche"];
   for(var a=0;a<dias.length;a++){
     var cl=claveListaFechaJornada(fechaActual,dias[a]), dats=cargarDato(cl); if(!dats)continue;
-    var lista; try{lista=JSON.parse(dats);}catch(e){continue;} if(!Array.isArray(lista))continue;
+   var lista; try{lista=JSON.parse(dats);}catch(e){continue;} if(!Array.isArray(lista))continue;
     for(var i=0;i<lista.length;i++){
       var j=lista[i]; if(j.tipo!=="parle")continue;
       var todosAciertan=true;
@@ -842,7 +843,7 @@ if ('serviceWorker' in navigator) {
 window.addEventListener('online', subirPendientes);
 // También revisar al abrir la página
 subirPendientes();
- // ==== CONTABILIDAD DIARIA ====
+// ==== CONTABILIDAD DIARIA ====
 function irContabilidadDiaria(){
   ocultarTodo();
   document.getElementById("pantallaContabilidad").classList.add("pantalla-activa");
@@ -882,7 +883,7 @@ function cargarContabilidad(){
 
   var fgGuardado = cargarDato(claveFondoGeneral());
   var fgActual = fgGuardado ? Number(fgGuardado) : 0;
-  document.getElementById("fgAnterior").textContent = "$" + fgActual.toFixed(2);
+  document.getElementById("fgAnterior").value = fgGuardado ? Number(fgGuardado).toFixed(2) : "0.00";
 
   var usuarios = obtenerListaUsuarios();
   var htmlM = "", htmlN = "", trM=0, tpM=0, trN=0, tpN=0;
@@ -949,8 +950,8 @@ function calcularTodo(){
   elGan.textContent = (ganDia>=0?"+":"") + "$" + ganDia.toFixed(2);
   elGan.className = ganDia>=0?"ganancia":"perdida";
   document.getElementById("ffDia").textContent = ffDia.toFixed(2);
+var fgActual = Number(document.getElementById("fgAnterior").value) || Number(cargarDato(claveFondoGeneral())) || 0;
 
-  var fgActual = Number(cargarDato(claveFondoGeneral()))||0;
   var porc = Number(document.getElementById("porcentajeFG").value)||0;
   var varFG = 0;
   if(ganDia !== 0){
@@ -960,7 +961,8 @@ function calcularTodo(){
     document.getElementById("textoAplicar").textContent = "Sin resultado";
   }
   var fgNuevo = fgActual + varFG;
-  document.getElementById("fgAnterior").textContent = "$" + fgActual.toFixed(2);
+  document.getElementById("fgAnterior").value = fgActual.toFixed(2);
+
   document.getElementById("varFG").textContent = (varFG>=0?"+":"") + "$" + varFG.toFixed(2);
   document.getElementById("fgNuevo").textContent = "$" + fgNuevo.toFixed(2);
 }
@@ -997,8 +999,8 @@ function guardarContabilidad(){
   guardarDato(claveFondoGeneral(), fgNuevo);
 
   alert("✅ Contabilidad guardada correctamente");
-    }
-   // ==== EXPORTAR CONTABILIDAD A EXCEL ====
+}
+// ==== EXPORTAR CONTABILIDAD A EXCEL ====
 function exportarContabilidadExcel(){
   var fecha = document.getElementById("fechaContabilidad").value;
   if(!fecha){ alert("Selecciona una fecha primero"); return; }
@@ -1056,10 +1058,9 @@ function exportarContabilidadExcel(){
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-    }
-  
+}
+
 </script>
 </body>
 </html>
-
-
+ 
