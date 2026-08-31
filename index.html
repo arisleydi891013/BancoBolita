@@ -147,6 +147,10 @@ label{font-weight:bold;display:block;margin-top:8px;}
     <div id="listaUsuarios"></div>
   </div>
   <button class="azul" onclick="irResumenAdmin()">📊 RESUMEN GENERAL DE TODOS LOS USUARIOS</button>
+  
+<button class="amarillo" onclick="irContabilidadDiaria()">📒 CONTABILIDAD DIARIA</button>
+</div>
+  
 </div>
 
 <div id="pantallaResumenAdmin" class="pantalla">
@@ -159,7 +163,111 @@ label{font-weight:bold;display:block;margin-top:8px;}
   </div>
   <div id="contenedorResumenAdmin"></div>
 </div>
+<div id="pantallaContabilidad" class="pantalla">
+  <h1>📒 CONTABILIDAD DIARIA</h1>
+  <button class="gris" onclick="volverPanelAdmin()">⬅️ Volver al Panel</button>
 
+  <div class="caja">
+    <label>📅 Fecha:</label>
+    <input id="fechaContabilidad" type="date">
+    <button class="azul" onclick="cargarContabilidad()">🔄 Cargar / Calcular</button>
+  </div>
+
+  <div class="caja">
+    <h3>🔄 Fondo del Día</h3>
+    <label>📦 Fondo Inicial (se arrastra del día anterior):</label>
+    <input type="number" step="0.01" id="fondoInicialCont" placeholder="0.00">
+  </div>
+
+  <div class="caja">
+    <h2>🌅 MAÑANA</h2>
+    <div id="listaMañana"></div>
+    <div class="resumen-cuadro">
+      <div class="resumen-fila">
+        <strong>💰 Total Recogido Mañana:</strong>
+        <strong id="totalRecMañana">$0.00</strong>
+      </div>
+      <div class="resumen-fila">
+        <strong>💸 Total Pagado Mañana:</strong>
+        <strong id="totalPagMañana">$0.00</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="caja">
+    <h2>🌙 NOCHE</h2>
+    <div id="listaNoche"></div>
+    <div class="resumen-cuadro">
+      <div class="resumen-fila">
+        <strong>💰 Total Recogido Noche:</strong>
+        <strong id="totalRecNoche">$0.00</strong>
+      </div>
+      <div class="resumen-fila">
+        <strong>💸 Total Pagado Noche:</strong>
+        <strong id="totalPagNoche">$0.00</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="caja" style="background:#e3f2fd;border:3px solid #1976d2;">
+    <h2 style="text-align:center;color:#1976d2;margin-top:0;">📊 RESUMEN TOTAL DEL DÍA</h2>
+    <div class="resumen-fila">
+      <label>📦 Fondo Inicial:</label>
+      <span id="fiResumen">$0.00</span>
+    </div>
+    <div class="resumen-fila">
+      <label>💰 Total Recogido (Mañana + Noche):</label>
+      <span id="trResumen">$0.00</span>
+    </div>
+    <div class="resumen-fila">
+      <label>💸 Total Pagado (Mañana + Noche):</label>
+      <span id="tpResumen">$0.00</span>
+    </div>
+    <div class="resumen-fila">
+      <label>✏️ Ajuste Manual (+ o -):</label>
+      <input type="number" step="0.01" id="ajusteCont" placeholder="0.00" style="width:120px;padding:6px;">
+    </div>
+    <div class="resumen-fila">
+      <strong>📈 Ganancia / 📉 Pérdida del día:</strong>
+      <strong id="ganDia" class="ganancia">$0.00</strong>
+    </div>
+    <div class="fondo-final" style="font-size:22px;">
+      🔄 Fondo Final del Día: $<span id="ffDia">0.00</span>
+    </div>
+    <p style="text-align:center;font-size:14px;color:#666;margin:5px 0 0 0;">
+      *(Este valor pasa automáticamente como Fondo Inicial del día siguiente)*
+    </p>
+  </div>
+
+  <div class="caja" style="background:#fff3e0;border:3px solid #f57c00;">
+    <h2 style="text-align:center;color:#e65100;margin-top:0;">💰 FONDO GENERAL CON PORCENTAJE</h2>
+    <div class="resumen-fila">
+      <label>🏦 Fondo General Anterior:</label>
+      <span id="fgAnterior">$0.00</span>
+    </div>
+    <div class="resumen-fila">
+      <label>📊 Porcentaje a aplicar (%):</label>
+      <input type="number" step="0.1" id="porcentajeFG" placeholder="10" style="width:80px;padding:6px;">
+    </div>
+    <div class="resumen-fila">
+      <label>📈 Aplicar sobre resultado del día:</label>
+      <span id="textoAplicar">—</span>
+    </div>
+    <div class="resumen-fila">
+      <label>➕/➖ Variación al Fondo General:</label>
+      <strong id="varFG">$0.00</strong>
+    </div>
+    <div class="resumen-fila" style="border-top:2px dashed #ccc;padding-top:12px;">
+      <strong>🏦 NUEVO FONDO GENERAL:</strong>
+      <strong id="fgNuevo" style="font-size:22px;color:#e65100;">$0.00</strong>
+    </div>
+  </div>
+
+  <button class="verde" onclick="guardarContabilidad()">💾 GUARDAR TODO</button>
+  <button class="azul" onclick="exportarContabilidadExcel()">📥 EXPORTAR A EXCEL</button>
+  
+</div>
+  
 <div id="sistemaPrincipal" class="pantalla">
   <button class="gris" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
   <div class="fecha-info" id="usuarioActivo"></div>
@@ -734,6 +842,221 @@ if ('serviceWorker' in navigator) {
 window.addEventListener('online', subirPendientes);
 // También revisar al abrir la página
 subirPendientes();
+ // ==== CONTABILIDAD DIARIA ====
+function irContabilidadDiaria(){
+  ocultarTodo();
+  document.getElementById("pantallaContabilidad").classList.add("pantalla-activa");
+  document.getElementById("fechaContabilidad").value = fechaActual;
+  cargarContabilidad();
+}
+
+function claveContabilidad(fecha){
+  return "contabilidad_diaria_" + fecha;
+}
+
+function claveFondoGeneral(){
+  return "fondo_general_bolita";
+}
+
+function fechaAnterior(fecha){
+  let d = new Date(fecha);
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().split('T')[0];
+}
+
+function cargarContabilidad(){
+  var fecha = document.getElementById("fechaContabilidad").value;
+  if(!fecha){ alert("Selecciona una fecha"); return; }
+
+  var datos = cargarDatoJSON(claveContabilidad(fecha), null);
+  var fechaAnt = fechaAnterior(fecha);
+  var datosAnt = cargarDatoJSON(claveContabilidad(fechaAnt), null);
+
+  var fiDefecto = 0;
+  if(datosAnt && datosAnt.fondoFinal) fiDefecto = datosAnt.fondoFinal;
+  if(datos && datos.fondoInicial) fiDefecto = datos.fondoInicial;
+
+  document.getElementById("fondoInicialCont").value = fiDefecto.toFixed(2);
+  document.getElementById("ajusteCont").value = datos && datos.ajuste ? datos.ajuste.toFixed(2) : "0.00";
+  document.getElementById("porcentajeFG").value = datos && datos.porcentajeFG ? datos.porcentajeFG : "10";
+
+  var fgGuardado = cargarDato(claveFondoGeneral());
+  var fgActual = fgGuardado ? Number(fgGuardado) : 0;
+  document.getElementById("fgAnterior").textContent = "$" + fgActual.toFixed(2);
+
+  var usuarios = obtenerListaUsuarios();
+  var htmlM = "", htmlN = "", trM=0, tpM=0, trN=0, tpN=0;
+
+  for(var i=0; i<usuarios.length; i++){
+    var nom = usuarios[i].usuario;
+    var rm = 0, pm = 0, rn = 0, pn = 0;
+    if(datos && datos.usuarios && datos.usuarios[nom]){
+      rm = Number(datos.usuarios[nom].recM)||0;
+      pm = Number(datos.usuarios[nom].pagM)||0;
+      rn = Number(datos.usuarios[nom].recN)||0;
+      pn = Number(datos.usuarios[nom].pagN)||0;
+    }
+    trM += rm; tpM += pm; trN += rn; tpN += pn;
+
+    htmlM += `<div style="display:flex;gap:8px;align-items:center;margin:6px 0;flex-wrap:wrap;">
+      <span style="width:100px;font-weight:bold;">👤 ${nom}</span>
+      <span>Recog:</span>
+      <input type="number" step="0.01" style="width:110px;padding:6px;" id="recM_${nom}" value="${rm.toFixed(2)}" onchange="calcularTodo()">
+      <span>Pag:</span>
+      <input type="number" step="0.01" style="width:110px;padding:6px;" id="pagM_${nom}" value="${pm.toFixed(2)}" onchange="calcularTodo()">
+    </div>`;
+
+    htmlN += `<div style="display:flex;gap:8px;align-items:center;margin:6px 0;flex-wrap:wrap;">
+      <span style="width:100px;font-weight:bold;">👤 ${nom}</span>
+      <span>Recog:</span>
+      <input type="number" step="0.01" style="width:110px;padding:6px;" id="recN_${nom}" value="${rn.toFixed(2)}" onchange="calcularTodo()">
+      <span>Pag:</span>
+      <input type="number" step="0.01" style="width:110px;padding:6px;" id="pagN_${nom}" value="${pn.toFixed(2)}" onchange="calcularTodo()">
+    </div>`;
+  }
+
+  document.getElementById("listaMañana").innerHTML = htmlM;
+  document.getElementById("listaNoche").innerHTML = htmlN;
+  document.getElementById("totalRecMañana").textContent = "$" + trM.toFixed(2);
+  document.getElementById("totalPagMañana").textContent = "$" + tpM.toFixed(2);
+  document.getElementById("totalRecNoche").textContent = "$" + trN.toFixed(2);
+  document.getElementById("totalPagNoche").textContent = "$" + tpN.toFixed(2);
+  calcularTodo();
+}
+
+function calcularTodo(){
+  var usuarios = obtenerListaUsuarios(), trM=0, tpM=0, trN=0, tpN=0;
+  for(var i=0; i<usuarios.length; i++){
+    var nom = usuarios[i].usuario;
+    trM += Number(document.getElementById("recM_"+nom).value)||0;
+    tpM += Number(document.getElementById("pagM_"+nom).value)||0;
+    trN += Number(document.getElementById("recN_"+nom).value)||0;
+    tpN += Number(document.getElementById("pagN_"+nom).value)||0;
+  }
+
+  var fi = Number(document.getElementById("fondoInicialCont").value)||0;
+  var tr = trM + trN;
+  var tp = tpM + tpN;
+  var aj = Number(document.getElementById("ajusteCont").value)||0;
+  var ganDia = tr - tp + aj;
+  var ffDia = fi + ganDia;
+
+  document.getElementById("fiResumen").textContent = "$" + fi.toFixed(2);
+  document.getElementById("trResumen").textContent = "$" + tr.toFixed(2);
+  document.getElementById("tpResumen").textContent = "$" + tp.toFixed(2);
+
+  var elGan = document.getElementById("ganDia");
+  elGan.textContent = (ganDia>=0?"+":"") + "$" + ganDia.toFixed(2);
+  elGan.className = ganDia>=0?"ganancia":"perdida";
+  document.getElementById("ffDia").textContent = ffDia.toFixed(2);
+
+  var fgActual = Number(cargarDato(claveFondoGeneral()))||0;
+  var porc = Number(document.getElementById("porcentajeFG").value)||0;
+  var varFG = 0;
+  if(ganDia !== 0){
+    varFG = ganDia * (porc / 100);
+    document.getElementById("textoAplicar").textContent = (ganDia>=0?"Ganancia":"Pérdida") + " × " + porc + "%";
+  } else {
+    document.getElementById("textoAplicar").textContent = "Sin resultado";
+  }
+  var fgNuevo = fgActual + varFG;
+  document.getElementById("fgAnterior").textContent = "$" + fgActual.toFixed(2);
+  document.getElementById("varFG").textContent = (varFG>=0?"+":"") + "$" + varFG.toFixed(2);
+  document.getElementById("fgNuevo").textContent = "$" + fgNuevo.toFixed(2);
+}
+
+function guardarContabilidad(){
+  var fecha = document.getElementById("fechaContabilidad").value;
+  if(!fecha){ alert("Selecciona una fecha"); return; }
+
+  var usuarios = obtenerListaUsuarios();
+  var datosUsu = {};
+  for(var i=0; i<usuarios.length; i++){
+    var nom = usuarios[i].usuario;
+    datosUsu[nom] = {
+      recM: Number(document.getElementById("recM_"+nom).value)||0,
+      pagM: Number(document.getElementById("pagM_"+nom).value)||0,
+      recN: Number(document.getElementById("recN_"+nom).value)||0,
+      pagN: Number(document.getElementById("pagN_"+nom).value)||0
+    };
+  }
+
+  var fi = Number(document.getElementById("fondoInicialCont").value)||0;
+  var tr = Number(document.getElementById("trResumen").textContent.replace("$",""))||0;
+  var tp = Number(document.getElementById("tpResumen").textContent.replace("$",""))||0;
+  var aj = Number(document.getElementById("ajusteCont").value)||0;
+  var ff = Number(document.getElementById("ffDia").textContent)||0;
+  var porc = Number(document.getElementById("porcentajeFG").value)||0;
+
+  guardarDatoJSON(claveContabilidad(fecha), {
+    fondoInicial: fi, totalRecogido: tr, totalPagado: tp,
+    ajuste: aj, fondoFinal: ff, porcentajeFG: porc, usuarios: datosUsu
+  });
+
+  var fgNuevo = Number(document.getElementById("fgNuevo").textContent.replace("$",""))||0;
+  guardarDato(claveFondoGeneral(), fgNuevo);
+
+  alert("✅ Contabilidad guardada correctamente");
+    }
+   // ==== EXPORTAR CONTABILIDAD A EXCEL ====
+function exportarContabilidadExcel(){
+  var fecha = document.getElementById("fechaContabilidad").value;
+  if(!fecha){ alert("Selecciona una fecha primero"); return; }
+
+  var usuarios = obtenerListaUsuarios();
+  var fi = Number(document.getElementById("fondoInicialCont").value)||0;
+  var trM = 0, tpM = 0, trN = 0, tpN = 0;
+
+  var csv = "Fecha," + fecha + "\n";
+  csv += "Fondo Inicial," + fi.toFixed(2) + "\n\n";
+  csv += "Usuario,Recogido Mañana,Pagado Mañana,Recogido Noche,Pagado Noche\n";
+
+  for(var i=0; i<usuarios.length; i++){
+    var nom = usuarios[i].usuario;
+    var rm = Number(document.getElementById("recM_"+nom).value)||0;
+    var pm = Number(document.getElementById("pagM_"+nom).value)||0;
+    var rn = Number(document.getElementById("recN_"+nom).value)||0;
+    var pn = Number(document.getElementById("pagN_"+nom).value)||0;
+    trM += rm; tpM += pm; trN += rn; tpN += pn;
+    csv += nom + "," + rm.toFixed(2) + "," + pm.toFixed(2) + "," + rn.toFixed(2) + "," + pn.toFixed(2) + "\n";
+  }
+
+  var tr = trM + trN;
+  var tp = tpM + tpN;
+  var aj = Number(document.getElementById("ajusteCont").value)||0;
+  var ganDia = tr - tp + aj;
+  var ffDia = fi + ganDia;
+  var fgAnt = Number(document.getElementById("fgAnterior").textContent.replace("$",""))||0;
+  var porc = Number(document.getElementById("porcentajeFG").value)||0;
+  var varFG = Number(document.getElementById("varFG").textContent.replace("$",""))||0;
+  var fgNuevo = Number(document.getElementById("fgNuevo").textContent.replace("$",""))||0;
+
+  csv += "\n";
+  csv += "TOTALES,,\n";
+  csv += "Total Recogido Mañana," + trM.toFixed(2) + "\n";
+  csv += "Total Pagado Mañana," + tpM.toFixed(2) + "\n";
+  csv += "Total Recogido Noche," + trN.toFixed(2) + "\n";
+  csv += "Total Pagado Noche," + tpN.toFixed(2) + "\n";
+  csv += "Total Recogido General," + tr.toFixed(2) + "\n";
+  csv += "Total Pagado General," + tp.toFixed(2) + "\n";
+  csv += "Ajuste Manual," + aj.toFixed(2) + "\n";
+  csv += "Ganancia/Pérdida del Día," + ganDia.toFixed(2) + "\n";
+  csv += "Fondo Final del Día," + ffDia.toFixed(2) + "\n";
+  csv += "\n";
+  csv += "Fondo General Anterior," + fgAnt.toFixed(2) + "\n";
+  csv += "Porcentaje Aplicado %," + porc + "\n";
+  csv += "Variación Fondo General," + varFG.toFixed(2) + "\n";
+  csv += "Nuevo Fondo General," + fgNuevo.toFixed(2) + "\n";
+
+  var blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "Contabilidad_" + fecha + ".csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+    }
   
 </script>
 </body>
