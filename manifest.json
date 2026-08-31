@@ -1,11 +1,12 @@
 {
-  "background_color": "rgb(0, 0, 0)",
+  "background_color": "#eeeeee",
   "dir": "ltr",
   "display": "standalone",
-  "name": "Bolita",
+  "name": "Banco de Bolita",
   "orientation": "any",
-  "scope": "/",
-  "short_name": "BancoBolita",
-  "start_url": "/",
-  "theme_color": "#ffffff"
+  "scope": "/BancoBolita/",
+  "short_name": "Bolita",
+  "start_url": "/BancoBolita/",
+  "theme_color": "#2e7d32",
+  "description": "Sistema de gestión de apuestas"
 }
