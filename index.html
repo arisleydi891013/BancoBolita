@@ -932,7 +932,7 @@ else {
   document.getElementById("totalRecNoche").textContent = "$" + trN.toFixed(2);
   document.getElementById("totalPagNoche").textContent = "$" + tpN.toFixed(2);
   calcularTodo();
-  recalcularFondoGeneral();
+  //recalcularFondoGeneral();
 
 }
 
@@ -978,7 +978,13 @@ function calcularTodo(){
  // document.getElementById("fgNuevo").textContent = "$" + fgNuevo.toFixed(2);
 }
 // Recalcula el fondo general SOLO cuando cambias un valor
+// Guardamos los últimos valores para no recalcular si no cambia nada
+var ultimoFgAnt = null;
+var ultimoPorc = null;
+var ultimaGanancia = null;
+
 function recalcularFondoGeneral(){
+  // Leer valores actuales
   var fgActual = Number(document.getElementById("fgAnterior").value) || 0;
   var porc = Number(document.getElementById("porcentajeFG").value) || 0;
   
@@ -990,6 +996,19 @@ function recalcularFondoGeneral(){
     ganDia = Number(soloNum) || 0;
   }
 
+  // ⛓️ Si nada cambió, NO hagas nada → se acabó la suma duplicada
+  if(fgActual === ultimoFgAnt && 
+     porc === ultimoPorc && 
+     ganDia === ultimaGanancia){
+    return;
+  }
+
+  // Guardar valores actuales como referencia
+  ultimoFgAnt = fgActual;
+  ultimoPorc = porc;
+  ultimaGanancia = ganDia;
+
+  // Calcular y mostrar SOLO si hubo cambio
   var varFG = 0;
   if(ganDia !== 0 && porc !== 0){
     varFG = ganDia * (porc / 100);
