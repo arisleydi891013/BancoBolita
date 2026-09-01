@@ -881,9 +881,18 @@ function cargarContabilidad(){
   document.getElementById("ajusteCont").value = datos && datos.ajuste ? datos.ajuste.toFixed(2) : "0.00";
   document.getElementById("porcentajeFG").value = datos && datos.porcentajeFG ? datos.porcentajeFG : "10";
 
+  var casillaFg = document.getElementById("fgAnterior");
+var datosHoy = cargarDatoJSON(claveContabilidad(fecha)); // datos de hoy
+
+if (datosHoy && datosHoy.fondoAnterior) {
+  // ✅ Ya trabajamos hoy → muestra lo de hoy, NO cambia nada
+  casillaFg.value = datosHoy.fondoAnterior;
+} 
+else {
+  // ⏳ Es la primera vez hoy → trae el valor guardado del día anterior
   var fgGuardado = cargarDato(claveFondoGeneral());
-  var fgActual = fgGuardado ? Number(fgGuardado) : 0;
-  document.getElementById("fgAnterior").value = fgGuardado ? Number(fgGuardado).toFixed(2) : "0.00";
+  casillaFg.value = fgGuardado ? Number(fgGuardado) : 0;
+}
 
   var usuarios = obtenerListaUsuarios();
   var htmlM = "", htmlN = "", trM=0, tpM=0, trN=0, tpN=0;
@@ -923,6 +932,8 @@ function cargarContabilidad(){
   document.getElementById("totalRecNoche").textContent = "$" + trN.toFixed(2);
   document.getElementById("totalPagNoche").textContent = "$" + tpN.toFixed(2);
   calcularTodo();
+  recalcularFondoGeneral();
+
 }
 
 function calcularTodo(){
@@ -950,22 +961,53 @@ function calcularTodo(){
   elGan.textContent = (ganDia>=0?"+":"") + "$" + ganDia.toFixed(2);
   elGan.className = ganDia>=0?"ganancia":"perdida";
   document.getElementById("ffDia").textContent = ffDia.toFixed(2);
-var fgActual = Number(document.getElementById("fgAnterior").value) || Number(cargarDato(claveFondoGeneral())) || 0;
+//var fgActual = Number(document.getElementById("fgAnterior").value) || Number(cargarDato(claveFondoGeneral())) || 0;
 
-  var porc = Number(document.getElementById("porcentajeFG").value)||0;
+ // var porc = Number(document.getElementById("porcentajeFG").value)||0;
+  //var varFG = 0;
+ // if(ganDia !== 0){
+   // varFG = ganDia * (porc / 100);
+  //  document.getElementById("textoAplicar").textContent = (ganDia>=0?"Ganancia":"Pérdida") + " × " + porc + "%";
+ // } else {
+   // document.getElementById("textoAplicar").textContent = "Sin resultado";
+//  }
+//  var fgNuevo = fgActual + varFG;
+  //document.getElementById("fgAnterior").value = fgActual.toFixed(2);
+
+//  document.getElementById("varFG").textContent = (varFG>=0?"+":"") + "$" + varFG.toFixed(2);
+ // document.getElementById("fgNuevo").textContent = "$" + fgNuevo.toFixed(2);
+}
+// Recalcula el fondo general SOLO cuando cambias un valor
+function recalcularFondoGeneral(){
+  var fgActual = Number(document.getElementById("fgAnterior").value) || 0;
+  var porc = Number(document.getElementById("porcentajeFG").value) || 0;
+  
+  var elemGan = document.getElementById("ganDia");
+  var ganDia = 0;
+  if(elemGan){
+    var texto = elemGan.textContent || "";
+    var soloNum = texto.replace(/[^0-9.\-]/g, "");
+    ganDia = Number(soloNum) || 0;
+  }
+
   var varFG = 0;
-  if(ganDia !== 0){
+  if(ganDia !== 0 && porc !== 0){
     varFG = ganDia * (porc / 100);
-    document.getElementById("textoAplicar").textContent = (ganDia>=0?"Ganancia":"Pérdida") + " × " + porc + "%";
-  } else {
-    document.getElementById("textoAplicar").textContent = "Sin resultado";
   }
   var fgNuevo = fgActual + varFG;
-  document.getElementById("fgAnterior").value = fgActual.toFixed(2);
 
-  document.getElementById("varFG").textContent = (varFG>=0?"+":"") + "$" + varFG.toFixed(2);
-  document.getElementById("fgNuevo").textContent = "$" + fgNuevo.toFixed(2);
+  var elemVar = document.getElementById("varFG");
+  var elemNuevo = document.getElementById("fgNuevo");
+  if(elemVar) elemVar.textContent = varFG.toFixed(2);
+  if(elemNuevo) elemNuevo.textContent = fgNuevo.toFixed(2);
 }
+
+document.addEventListener("DOMContentLoaded", function(){
+  var casillaAnterior = document.getElementById("fgAnterior");
+  var casillaPorcentaje = document.getElementById("porcentajeFG");
+  if(casillaAnterior) casillaAnterior.addEventListener("input", recalcularFondoGeneral);
+  if(casillaPorcentaje) casillaPorcentaje.addEventListener("input", recalcularFondoGeneral);
+});
 
 function guardarContabilidad(){
   var fecha = document.getElementById("fechaContabilidad").value;
