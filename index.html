@@ -874,7 +874,7 @@ function cargarContabilidad(){
   var datosAnt = cargarDatoJSON(claveContabilidad(fechaAnt), null);
 
   var fiDefecto = 0;
-  if(datosAnt && datosAnt.fondoFinal) fiDefecto = datosAnt.fondoFinal;
+  //if(datosAnt && datosAnt.fondoFinal) fiDefecto = datosAnt.fondoFinal;
   if(datos && datos.fondoInicial) fiDefecto = datos.fondoInicial;
 
   document.getElementById("fondoInicialCont").value = fiDefecto.toFixed(2);
@@ -886,12 +886,12 @@ var datosHoy = cargarDatoJSON(claveContabilidad(fecha)); // datos de hoy
 
 if (datosHoy && datosHoy.fondoAnterior) {
   // ✅ Ya trabajamos hoy → muestra lo de hoy, NO cambia nada
-  casillaFg.value = datosHoy.fondoAnterior;
+  //casillaFg.value = datosHoy.fondoAnterior;
 } 
 else {
   // ⏳ Es la primera vez hoy → trae el valor guardado del día anterior
   var fgGuardado = cargarDato(claveFondoGeneral());
-  casillaFg.value = fgGuardado ? Number(fgGuardado) : 0;
+  //casillaFg.value = fgGuardado ? Number(fgGuardado) : 0;
 }
 
   var usuarios = obtenerListaUsuarios();
@@ -1024,8 +1024,8 @@ function recalcularFondoGeneral(){
 document.addEventListener("DOMContentLoaded", function(){
   var casillaAnterior = document.getElementById("fgAnterior");
   var casillaPorcentaje = document.getElementById("porcentajeFG");
-  if(casillaAnterior) casillaAnterior.addEventListener("input", recalcularFondoGeneral);
-  if(casillaPorcentaje) casillaPorcentaje.addEventListener("input", recalcularFondoGeneral);
+  if(casillaAnterior) casillaAnterior.addEventListener("blur", recalcularFondoGeneral);
+  if(casillaPorcentaje) casillaPorcentaje.addEventListener("blur", recalcularFondoGeneral);
 });
 
 function guardarContabilidad(){
