@@ -15,7 +15,6 @@ const firebaseConfig = {
   authDomain: "bancobolita-b39aa.firebaseapp.com",
   projectId: "bancobolita-b39aa",
   databaseURL: "https://bancobolita-b39aa-default-rtdb.firebaseio.com",
-
   storageBucket: "bancobolita-b39aa.firebasestorage.app",
   messagingSenderId: "1012596382923",
   appId: "1:1012596382923:web:998803ba4d4fec80f64f4e"
@@ -26,6 +25,7 @@ if (!window.firebaseApps) {
 }
 const db = firebase.database();
 </script>
+  
 <style>
 *{box-sizing:border-box}
 body{font-family:Arial,sans-serif;background:#eeeeee;margin:0;padding:15px;color:#222;}
@@ -97,15 +97,16 @@ label{font-weight:bold;display:block;margin-top:8px;}
 </div>
 
 <div id="pantallaAdmin" class="pantalla">
-  <div class="login-caja">
     <h2>🔧 ACCESO DE ADMINISTRADOR</h2>
-    <label>Contraseña de Administrador</label>
-    <input id="claveAdmin" type="password" placeholder="Solo para el dueño">
+    <label>👤 Usuario:</label>
+    <input id="usuarioAdmin" type="text" placeholder="Escribe tu usuario">
+    <label>🔑 Contraseña de Administrador:</label>
+    <input id="claveAdmin" type="password" placeholder="Escribe tu contraseña">
     <button class="azul" onclick="entrarAdmin()">🔑 Entrar</button>
     <button class="gris" onclick="volverLogin()">⬅️ Volver</button>
     <div id="mensajeAdmin" class="mensaje oculto"></div>
-  </div>
 </div>
+
 <div id="pantallaPanelAdmin" class="pantalla">
   <h1>⚙️ PANEL DE ADMINISTRACIÓN</h1>
   <button class="gris" onclick="volverLogin()">⬅️ Cerrar Sesión</button>
@@ -146,39 +147,79 @@ label{font-weight:bold;display:block;margin-top:8px;}
     <h3>📋 Lista de Usuarios y Tarifas</h3>
     <div id="listaUsuarios"></div>
   </div>
-  <button class="azul" onclick="irResumenAdmin()">📊 RESUMEN GENERAL DE TODOS LOS USUARIOS</button>
-
-<button class="amarillo" onclick="irContabilidadDiaria()">📒 CONTABILIDAD DIARIA</button>
+  <button class="verde" onclick="abrirResultados()">🏁 Resultados y Premios</button>
+  <button class="azul" onclick="abrirPanelCalculo()">🧮 CÁLCULO DE PREMIOS</button>
+  <button class="azul" style="padding:15px; font-size:16px; margin:5px 0;" onclick="abrirResumenGeneral()">📊 RESUMEN GENERAL</button>
+  <button class="amarillo" onclick="irContabilidadDiaria()">📒 CONTABILIDAD DIARIA</button>
 </div>
-
-</div>
-
-<div id="pantallaResumenAdmin" class="pantalla">
-  <h1>📊 RESUMEN GENERAL DEL ADMINISTRADOR</h1>
+<div id="pantallaResultados" class="pantalla">
+  <h1>🏁 INTRODUCIR RESULTADOS</h1>
   <button class="gris" onclick="volverPanelAdmin()">⬅️ Volver al Panel</button>
   <div class="caja">
-    <label>📅 Fecha a gestionar:</label>
-    <input id="fechaResumenAdmin" type="date">
-    <button class="azul" onclick="cargarResumenAdmin()">🔍 Cargar / Calcular</button>
+    <label>📅 Fecha:</label>
+    <input id="fechaResultados" type="date" onchange="cargarResultadosPorFecha()">
   </div>
-  <div id="contenedorResumenAdmin"></div>
+  <div class="caja">
+    <h2>🌅 JORNADA DE LA MAÑANA</h2>
+    <label>🎯 Fijo:</label>
+    <input id="fijoManana" type="number" placeholder="0-99">
+    <label>🏃 Corrido 1:</label>
+    <input id="corrido1Manana" type="number" placeholder="0-99">
+    <label>🏃 Corrido 2:</label>
+    <input id="corrido2Manana" type="number" placeholder="0-99">
+  </div>
+  <div class="caja">
+    <h2>🌙 JORNADA DE LA NOCHE</h2>
+    <label>🎯 Fijo:</label>
+    <input id="fijoNoche" type="number" placeholder="0-99">
+    <label>🏃 Corrido 1:</label>
+    <input id="corrido1Noche" type="number" placeholder="0-99">
+    <label>🏃 Corrido 2:</label>
+    <input id="corrido2Noche" type="number" placeholder="0-99">
+  </div>
+  <button class="verde" onclick="guardarResultados()">💾 Guardar Resultados</button>
+  <div id="mensajeResultados"></div>
 </div>
+
+<div id="pantallaResumenGeneral" class="pantalla">
+  <h1>📊 RESUMEN GENERAL DEL DÍA</h1>
+  <button class="gris" onclick="volverPanelAdmin()">⬅️ Volver al Panel</button>
+  <div class="caja">
+    <label>📅 Fecha:</label>
+    <input id="fechaResumenGeneral" type="date" onchange="cargarResumenGeneral()">
+  </div>
+  <div class="caja">
+    <label>💰 Fondo Inicial (del día anterior):</label>
+    <input id="fondoInicial" type="number" step="0.01" placeholder="0.00" onchange="calcularResumenGeneral()">
+  </div>
+  <div class="caja" style="background:#f8f9fa; padding:15px; border-radius:8px;">
+    <p>📥 Total Recogido del Día: <strong id="totalRecogidoDiaResumen">$0.00</strong></p>
+    <p>💵 Total Pagado (20% listeros): <strong id="totalPagadoListeros">$0.00</strong></p>
+    <p>🏆 Total Premios Pagados: <strong id="totalPremiosPagados">$0.00</strong></p>
+    <label>⚙️ Ajuste Manual (+ o -):</label>
+    <input id="ajusteManual" type="number" step="0.01" placeholder="0.00" onchange="calcularResumenGeneral()">
+    <small style="color:#666;">Número positivo = sumar | Negativo = restar</small>
+  </div>
+  <hr>
+  <h3>📈 Ganancia/Pérdida del Día: <strong id="gananciaDia">$0.00</strong></h3>
+  <h2>💰 Fondo Final: <strong id="fondoFinal">$0.00</strong></h2>
+  <button class="verde" onclick="guardarResumenGeneral()">💾 GUARDAR RESUMEN</button>
+  <div id="mensajeResumenGeneral"></div>
+</div>
+
 <div id="pantallaContabilidad" class="pantalla">
   <h1>📒 CONTABILIDAD DIARIA</h1>
   <button class="gris" onclick="volverPanelAdmin()">⬅️ Volver al Panel</button>
-
   <div class="caja">
     <label>📅 Fecha:</label>
     <input id="fechaContabilidad" type="date">
     <button class="azul" onclick="cargarContabilidad()">🔄 Cargar / Calcular</button>
   </div>
-
   <div class="caja">
     <h3>🔄 Fondo del Día</h3>
     <label>📦 Fondo Inicial (se arrastra del día anterior):</label>
     <input type="number" step="0.01" id="fondoInicialCont" placeholder="0.00">
   </div>
-
   <div class="caja">
     <h2>🌅 MAÑANA</h2>
     <div id="listaMañana"></div>
@@ -193,7 +234,6 @@ label{font-weight:bold;display:block;margin-top:8px;}
       </div>
     </div>
   </div>
-
   <div class="caja">
     <h2>🌙 NOCHE</h2>
     <div id="listaNoche"></div>
@@ -208,7 +248,6 @@ label{font-weight:bold;display:block;margin-top:8px;}
       </div>
     </div>
   </div>
-
   <div class="caja" style="background:#e3f2fd;border:3px solid #1976d2;">
     <h2 style="text-align:center;color:#1976d2;margin-top:0;">📊 RESUMEN TOTAL DEL DÍA</h2>
     <div class="resumen-fila">
@@ -238,13 +277,11 @@ label{font-weight:bold;display:block;margin-top:8px;}
       *(Este valor pasa automáticamente como Fondo Inicial del día siguiente)*
     </p>
   </div>
-
   <div class="caja" style="background:#fff3e0;border:3px solid #f57c00;">
     <h2 style="text-align:center;color:#e65100;margin-top:0;">💰 FONDO GENERAL CON PORCENTAJE</h2>
     <div class="resumen-fila">
       <label>🏦 Fondo General Anterior:</label>
       <input type="number" step="0.01" id="fgAnterior" placeholder="0.00" style="width:140px;padding:6px;">
-
     </div>
     <div class="resumen-fila">
       <label>📊 Porcentaje a aplicar (%):</label>
@@ -263,16 +300,13 @@ label{font-weight:bold;display:block;margin-top:8px;}
       <strong id="fgNuevo" style="font-size:22px;color:#e65100;">$0.00</strong>
     </div>
   </div>
-
   <button class="verde" onclick="guardarContabilidad()">💾 GUARDAR TODO</button>
   <button class="azul" onclick="exportarContabilidadExcel()">📥 EXPORTAR A EXCEL</button>
-
 </div>
 
 <div id="sistemaPrincipal" class="pantalla">
   <button class="gris" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
   <div class="fecha-info" id="usuarioActivo"></div>
-  
   <div class="tarifas-info" id="tarifasUsuario" style="display:none;">
     <h3 style="margin:0 0 8px 0;">💰 Tus Tarifas Asignadas</h3>
     <div class="tarifa-linea"><span>🎯 Fijo:</span><span id="tFijo">$0</span></div>
@@ -280,27 +314,30 @@ label{font-weight:bold;display:block;margin-top:8px;}
     <div class="tarifa-linea"><span>📍 Posición:</span><span id="tPosicion">×5</span></div>
     <div class="tarifa-linea"><span>🔗 Parlé:</span><span id="tParle">$1100</span></div>
   </div>
-  
   <h1>🎱 BANCO DE BOLITA</h1>
   <div class="fecha-info" id="fechaHoy"></div>
   <h2>📋 LISTAS</h2>
-  <button class="lista" onclick="abrirLista('Mañana')">🌅 LISTA MAÑANA</button>
-  <button class="lista" onclick="abrirLista('Noche')">🌙 LISTA NOCHE</button>
-  <button class="verde" onclick="abrirResultados()">🏆 INTRODUCIR RESULTADOS</button>
-  <button class="azul" onclick="abrirCalculo()">🏆 CALCULAR PREMIOS</button>
-  <button class="amarillo" onclick="abrirResumen()">📊 RESUMEN DIARIO</button>
-  <button class="gris" onclick="abrirHistorial()">📚 VER HISTORIAL</button>
+  <button onclick="abrirLista('mañana')">🌅 LISTA MAÑANA</button>
+  <button onclick="abrirLista('noche')">🌙 LISTA NOCHE</button>
+  <div class="caja" style="border:2px solid #222; margin-top:15px; padding:15px;">
+    <h3>📊 TOTAL DEL DÍA</h3>
+    <p>💰 Total Recogido: $<span id="totalRecogidoDia">0.00</span></p>
+    <p>💵 Cobro Total (20%): $<span id="cobroTotalDia">0.00</span></p>
+    <p>📤 Total a Entregar: $<span id="entregarTotalDia">0.00</span></p>
+    <button onclick="guardarTotalDia()">💾 Guardar Resumen</button>
+  </div>
 </div>
+
 <div id="pantallaLista" class="pantalla">
   <h1 id="tituloLista"></h1>
   <div class="fecha-info" id="fechaLista"></div>
   <button class="gris" onclick="volverInicio()">⬅️ VOLVER AL INICIO</button>
   <label>Tipo de jugada</label>
   <select id="tipo" onchange="cambiarTipo()">
-  <option value="fijo">🎯 Fijos</option>
-  <option value="corrido">🏃 Corridos</option>
-  <option value="posicion">📍 Posición</option>
-  <option value="parle">🔗 Parlé</option>
+    <option value="fijo">🎯 Fijos</option>
+    <option value="corrido">🏃 Corridos</option>
+    <option value="posicion">📍 Posición</option>
+    <option value="parle">🔗 Parlé</option>
   </select>
   <div id="camposNormal">
     <label>Número</label>
@@ -328,87 +365,40 @@ label{font-weight:bold;display:block;margin-top:8px;}
   <button class="rojo" onclick="borrarTodaLaLista()">🗑️ BORRAR LISTA</button>
   <h2>📋 JUGADAS</h2>
   <div id="jugadas"></div>
-  <div class="total">💰 TOTAL RECOGIDO: $<span id="total">0.00</span></div>
-</div>
-
-<div id="pantallaResultados" class="pantalla">
-  <h1>🏆 RESULTADOS</h1>
-  <div class="fecha-info" id="fechaResultados"></div>
-  <button class="gris" onclick="volverInicio()">⬅️ VOLVER AL INICIO</button>
-  <div class="caja">
-    <label>🎯 Fijo</label>
-    <input id="fijo" type="number" inputmode="numeric" placeholder="Número del Fijo">
-    <label>🏃 Corrido 1</label>
-    <input id="corrido1" type="number" inputmode="numeric" placeholder="Primer Corrido">
-    <label>🏃 Corrido 2</label>
-    <input id="corrido2" type="number" inputmode="numeric" placeholder="Segundo Corrido">
-    <button class="verde" onclick="guardarResultados()">💾 GUARDAR RESULTADOS</button>
-    <div id="mensajeResultados"></div>
+  <div class="total">
+    <p>💰 Total Recogido: $<span id="totalRecogidoJornada">0.00</span></p>
+    <p>💵 Cobro (20%): $<span id="cobroJornada">0.00</span></p>
+    <p>📤 A Entregar: $<span id="entregarJornada">0.00</span></p>
   </div>
 </div>
 
 <div id="pantallaCalculo" class="pantalla">
-  <h1>🏆 CALCULAR PREMIOS</h1>
-  <div class="fecha-info" id="fechaCalculo"></div>
-  <button class="gris" onclick="volverInicio()">⬅️ VOLVER AL INICIO</button>
+  <h1>🧮 CÁLCULO DE PREMIOS</h1>
+  <button class="gris" onclick="volverPanelAdmin()">⬅️ Volver al Panel</button>
   <div class="caja">
-    <h2>🎯 PREMIOS DE FIJOS</h2>
-    <div id="premiosFijos"></div>
-    <h2 class="separador">🏃 PREMIOS DE CORRIDOS</h2>
-    <div id="premiosCorridos"></div>
-    <h2 class="separador">📍 PREMIOS DE POSICIÓN</h2>
-    <div id="premiosPosicion"></div>
-    <h2 class="separador">🔗 PREMIOS DE PARLÉ</h2>
-    <div id="premiosParle"></div>
+    <label>📅 Fecha:</label>
+    <input id="fechaCalculo" type="date">
   </div>
-</div>
-
-<div id="pantallaResumen" class="pantalla">
-  <h1>📊 RESUMEN DIARIO</h1>
-  <div class="fecha-info" id="fechaResumen"></div>
-  <button class="gris" onclick="volverInicio()">⬅️ VOLVER AL INICIO</button>
-  <div class="resumen-cuadro">
-    <div class="resumen-fila fila-fondo-inicial">
-      <label>📦 Fondo inicial del día:</label>
-      <input type="number" step="0.01" id="fondoInicial" placeholder="Se arrastra del día anterior">
-    </div>
-    <div class="resumen-fila">
-      <label>💰 Total recogido (jugadas):</label>
-      <input type="number" step="0.01" id="totalRecogido" placeholder="Se calcula automáticamente">
-    </div>
-    <div class="resumen-fila">
-      <label>💸 Total pagado (premios):</label>
-      <input type="number" step="0.01" id="totalPagado" placeholder="Se calcula automáticamente">
-    </div>
-    <div class="resumen-fila">
-      <label>✏️ Ajuste manual (opcional):</label>
-      <input type="number" step="0.01" id="ajusteManual" placeholder="0.00">
-    </div>
-    <div class="resumen-fila">
-      <strong>📈 Ganancia / 📉 Pérdida:</strong>
-      <strong id="gananciaPerdida">0.00</strong>
-    </div>
-    <div class="fondo-final">
-      🔄 Fondo para el siguiente día: $<span id="fondoSiguiente">0.00</span>
-    </div>
+  <div style="display: flex; gap: 10px; margin: 15px 0;">
+    <button class="verde" style="flex: 1; padding: 15px;" onclick="calcularMañana()">🌅 Calcular Mañana</button>
+    <button class="naranja" style="flex: 1; padding: 15px;" onclick="calcularNoche()">🌙 Calcular Noche</button>
   </div>
-  <button class="verde" onclick="guardarResumen()">💾 GUARDAR RESUMEN</button>
-  <button class="azul" onclick="calcularResumen()">🔄 RECALCULAR</button>
-</div>
-
-<div id="pantallaHistorial" class="pantalla">
-  <h1>📚 HISTORIAL POR DÍA</h1>
-  <button class="gris" onclick="volverInicio()">⬅️ VOLVER AL INICIO</button>
-  <div class="caja">
-    <label>Buscar por fecha:</label>
-    <input id="fechaBuscar" type="date">
-    <button class="azul" onclick="cargarFechaEspecifica()">🔍 Cargar esta fecha</button>
-    <h2>Todos los días guardados:</h2>
-    <div id="listaFechas"></div>
-  </div>
+  <hr>
+  <h3 id="tituloCalculoJornada"></h3>
+  <div id="resultadoCalculoJornada" style="margin-top: 15px;"></div>
 </div>
 <script>
-const CLAVE_ADMIN = "admin123";
+window.onerror = function(mensaje, url, linea) {
+  alert("ERROR en línea " + linea + ":\n" + mensaje);
+  return true;
+};
+
+const administradores = [
+  { usuario: "Ari", clave: "891013" },
+  { usuario: "Yuma", clave: "851006" }
+];
+let adminConectado = null;
+
 let usuarioActual = null;
 let fechaActual = fechaHoy();
 let jornadaActual = "";
@@ -430,20 +420,17 @@ function vigilarConexion(){
     }
   });
   db.ref("datos").on("value", function(snapshot) {
-  const datos = snapshot.val();
-  if (datos) {
-    console.log("Datos cargados:", datos);
-  }
-});
-
+    const datos = snapshot.val();
+    if (datos) console.log("Datos cargados:", datos);
+  });
 }
+
 function guardarDato(clave, valor){
   localStorage.setItem(clave, valor);
   if(conexionActiva && typeof db !== 'undefined'){
-    db.ref("datos/"+clave).set(valor)
-      .catch(function(){
-        agregarPendiente(clave, valor);
-      });
+    db.ref("datos/"+clave).set(valor).catch(function(){
+      agregarPendiente(clave, valor);
+    });
   } else {
     agregarPendiente(clave, valor);
   }
@@ -453,34 +440,16 @@ function guardarDatoJSON(clave, objeto){
   const texto = JSON.stringify(objeto);
   guardarDato(clave, texto);
 }
-  // Guardar dato como pendiente si no hay conexión
+
 function agregarPendiente(clave, valor) {
   let pendientes = JSON.parse(localStorage.getItem("pendientes") || "[]");
   pendientes.push({ clave: clave, valor: valor });
   localStorage.setItem("pendientes", JSON.stringify(pendientes));
 }
-  function subirPendientes() {
-  const pendientes = localStorage.getItem("pendientes");
-  if (!pendientes) return;
 
-  try {
-    const lista = JSON.parse(pendientes);
-    lista.forEach(function(item) {
-      db.ref("datos/" + item.clave).set(item.valor);
-    });
-    localStorage.removeItem("pendientes");
-    console.log("✅ Datos pendientes subidos a Firebase");
-  } catch(e) {
-    console.log("Error al subir pendientes:", e);
-  }
-}
-
-
-// Subir todos los pendientes a Firebase
 function subirPendientes() {
   const pendientes = localStorage.getItem("pendientes");
   if (!pendientes) return;
-
   try {
     const lista = JSON.parse(pendientes);
     lista.forEach(function(item) {
@@ -493,15 +462,14 @@ function subirPendientes() {
   }
 }
 
-// Cuando vuelva el internet → subir automáticamente
 window.addEventListener('online', subirPendientes);
-// También revisar al abrir la página
 subirPendientes();
 
 function cargarDato(clave, defecto=null){
   const local = localStorage.getItem(clave);
   return local !== null ? local : defecto;
 }
+
 function cargarDatoJSON(clave, defecto=[]){
   const d = cargarDato(clave);
   if(!d) return defecto;
@@ -516,126 +484,98 @@ function fechaHoy(){
   var dia=String(d.getDate()).padStart(2,'0');
   return año+"-"+mes+"-"+dia;
 }
-function fechaAnterior(fecha){
-  var partes=fecha.split("-");
-  var d=new Date(partes[0],partes[1]-1,partes[2]);
-  d.setDate(d.getDate()-1);
-  var año=d.getFullYear();
-  var mes=String(d.getMonth()+1).padStart(2,'0');
-  var dia=String(d.getDate()).padStart(2,'0');
-  return año+"-"+mes+"-"+dia;
-}
+
 function esFechaVencida(fechaLimite){
   if(!fechaLimite) return false;
   var hoy = new Date(); hoy.setHours(0,0,0,0);
   var vencimiento = new Date(fechaLimite); vencimiento.setHours(0,0,0,0);
   return hoy > vencimiento;
 }
+
 function obtenerListaUsuarios(){
   return cargarDatoJSON("sistema_bolita_usuarios", []);
 }
+
 function guardarListaUsuarios(lista){
   guardarDatoJSON("sistema_bolita_usuarios", lista);
 }
+
 function buscarUsuario(nombre){
   var lista = obtenerListaUsuarios();
   return lista.find(u => u.usuario === nombre);
 }
+
 function mostrarMensaje(elementoId, texto, tipo){
   var el = document.getElementById(elementoId);
-  el.textContent = texto;
-  el.className = "mensaje " + tipo;
-  el.classList.remove("oculto");
-  setTimeout(() => el.classList.add("oculto"), 4000);
+  if(el){
+    el.textContent = texto;
+    el.className = "mensaje " + tipo;
+    el.classList.remove("oculto");
+    setTimeout(() => el.classList.add("oculto"), 4000);
+  }
 }
+
 function ocultarTodo(){
   var pantallas = document.querySelectorAll(".pantalla");
   pantallas.forEach(p => p.classList.remove("pantalla-activa"));
 }
-function volverLogin(){ ocultarTodo(); document.getElementById("pantallaLogin").classList.add("pantalla-activa"); usuarioActual = null; }
-function irAdmin(){ ocultarTodo(); document.getElementById("pantallaAdmin").classList.add("pantalla-activa"); }
+
+function volverLogin(){ 
+  ocultarTodo(); 
+  document.getElementById("pantallaLogin").classList.add("pantalla-activa"); 
+  usuarioActual = null; 
+}
+
+function irAdmin(){
+  ocultarTodo();
+  document.getElementById("pantallaAdmin").classList.add("pantalla-activa");
+  var campoUsu = document.getElementById("usuarioAdmin");
+  var campoCla = document.getElementById("claveAdmin");
+  if(campoUsu) campoUsu.value = "";
+  if(campoCla) campoCla.value = "";
+}
+
 function entrarAdmin(){
-  var clave = document.getElementById("claveAdmin").value;
-  if(clave === CLAVE_ADMIN){
-    usuarioActual = "__admin__"; ocultarTodo();
-    document.getElementById("pantallaPanelAdmin").classList.add("pantalla-activa");
-    listarUsuarios(); document.getElementById("claveAdmin").value = "";
-  } else { mostrarMensaje("mensajeAdmin", "❌ Contraseña incorrecta", "error"); }
-}
-function volverPanelAdmin(){ ocultarTodo(); document.getElementById("pantallaPanelAdmin").classList.add("pantalla-activa"); }
-function irResumenAdmin(){ ocultarTodo(); document.getElementById("pantallaResumenAdmin").classList.add("pantalla-activa"); document.getElementById("fechaResumenAdmin").value = fechaActual; }
-function guardarResumenUsuario(usuario, fecha, fondoInicial, totalRecogido, totalPagado, ajuste){
-  var clave = usuario + "_bolita_resumen_" + fecha;
-  var resultado = (Number(fondoInicial)||0)+(Number(totalRecogido)||0)-(Number(totalPagado)||0)+(Number(ajuste)||0);
-  guardarDatoJSON(clave, {fecha:fecha,fondoInicial:Number(fondoInicial)||0,totalRecogido:Number(totalRecogido)||0,totalPagado:Number(totalPagado)||0,ajuste:Number(ajuste)||0,fondoFinal:resultado});
-}
-function cargarResumenAdmin(){
-  var fecha = document.getElementById("fechaResumenAdmin").value;
-  if(!fecha){ alert("Selecciona una fecha"); return; }
-  var contenedor = document.getElementById("contenedorResumenAdmin");
-  contenedor.innerHTML = "<p style='text-align:center;'>Cargando...</p>";
-  var usuarios = obtenerListaUsuarios(), gtr=0, gtp=0, gtf=0, gta=0, html="";
-  for(var u=0; u<usuarios.length; u++){
-    try{
-      var usu = usuarios[u].usuario, clave = usu + "_bolita_resumen_" + fecha, dg = cargarDato(clave);
-      var fi=0, tr=0, tp=0, aj=0;
-      if(dg){ var r=JSON.parse(dg); fi=Number(r.fondoInicial)||0; tr=Number(r.totalRecogido)||0; tp=Number(r.totalPagado)||0; aj=Number(r.ajuste)||0; }
-      var res = fi+tr-tp+aj, eg = res>=0, sgn = eg?"+":"", cls = eg?"ganancia":"perdida";
-      gtf+=fi; gtr+=tr; gtp+=tp; gta+=aj;
-      html += `<div class="caja"><h3>👤 Usuario: ${usu}</h3><div class="resumen-cuadro">
-        <div class="resumen-fila"><label>📦 Fondo inicial:</label><input type="number" step="0.01" id="fondo_${usu}" value="${fi.toFixed(2)}" style="width:120px;padding:6px;"></div>
-        <div class="resumen-fila"><label>💰 Total recogido:</label><input type="number" step="0.01" id="recogido_${usu}" value="${tr.toFixed(2)}" style="width:120px;padding:6px;"></div>
-        <div class="resumen-fila"><label>💸 Total pagado:</label><input type="number" step="0.01" id="pagado_${usu}" value="${tp.toFixed(2)}" style="width:120px;padding:6px;"></div>
-        <div class="resumen-fila"><label>✏️ Ajuste:</label><input type="number" step="0.01" id="ajuste_${usu}" value="${aj.toFixed(2)}" style="width:120px;padding:6px;"></div>
-        <div class="resumen-fila"><strong>📈 Resultado:</strong><strong class="${cls}" style="font-size:19px;">${sgn}$${res.toFixed(2)}</strong></div>
-      </div><button class="verde pequeño" onclick="guardarUno('${usu}','${fecha}')">💾 Guardar</button></div>`;
-    }catch(err){ console.error(err); }
+  var usu = document.getElementById("usuarioAdmin").value.trim();
+  var cla = document.getElementById("claveAdmin").value.trim();
+  if(!usu || !cla){
+    alert("Escribe usuario y contraseña");
+    return;
   }
-  var fg=0, cfg="fondoGeneralAdmin_"+fecha, dfg=cargarDato(cfg); if(dfg) fg=Number(dfg)||0;
-  var grs=fg+gtf+gtr-gtp+gta, geg=grs>=0;
-  html += `<div class="caja" style="background:#e3f2fd;border:3px solid #1976d2;">
-    <h2 style="text-align:center;color:#1976d2;margin-top:0;">🏆 GRAN TOTAL</h2>
-    <div class="resumen-fila"><span>📦 Fondo General:</span><input type="number" step="0.01" id="fondoGeneralAdmin" value="${fg}"></div>
-    <div class="resumen-cuadro">
-      <div class="resumen-fila"><span>📦 Fondo inicial total:</span><strong>$${gtf.toFixed(2)}</strong></div>
-      <div class="resumen-fila"><span>💰 Total recogido:</span><strong>$${gtr.toFixed(2)}</strong></div>
-      <div class="resumen-fila"><span>💸 Total pagado:</span><strong>$${gtp.toFixed(2)}</strong></div>
-      <div class="resumen-fila"><span>✏️ Ajuste total:</span><strong>$${gta.toFixed(2)}</strong></div>
-      <div class="resumen-fila"><strong>📈 Resultado:</strong><strong style="font-size:24px;" class="${geg?'ganancia':'perdida'}">${geg?'+' : ''}$${grs.toFixed(2)}</strong></div>
-    </div>
-    <button class="verde" onclick="guardarTodos('${fecha}')">💾 GUARDAR TODOS</button>
-  </div>`;
-  contenedor.innerHTML = html;
+  for(var i = 0; i < administradores.length; i++){
+    if(usu === administradores[i].usuario && cla === administradores[i].clave){
+      adminConectado = usu;
+      usuarioActual = "__admin__";
+      ocultarTodo();
+      document.getElementById("pantallaPanelAdmin").classList.add("pantalla-activa");
+      listarUsuarios();
+      return;
+    }
+  }
+  alert("❌ Usuario o contraseña incorrectos");
 }
-function guardarUno(usuario, fecha){
-  var fi=document.getElementById("fondo_"+usuario).value, tr=document.getElementById("recogido_"+usuario).value, tp=document.getElementById("pagado_"+usuario).value, aj=document.getElementById("ajuste_"+usuario).value;
-  guardarResumenUsuario(usuario,fecha,fi,tr,tp,aj);
-  guardarDato("fondoGeneralAdmin_"+fecha, document.getElementById("fondoGeneralAdmin").value);
-  alert("✅ Guardado para "+usuario); cargarResumenAdmin();
-}
-function guardarTodos(fecha){
-  obtenerListaUsuarios().forEach(u=>{var fi=document.getElementById("fondo_"+u.usuario).value, tr=document.getElementById("recogido_"+u.usuario).value, tp=document.getElementById("pagado_"+u.usuario).value, aj=document.getElementById("ajuste_"+u.usuario).value; guardarResumenUsuario(u.usuario,fecha,fi,tr,tp,aj);});
-  guardarDato("fondoGeneralAdmin_"+fecha, document.getElementById("fondoGeneralAdmin").value);
-  alert("✅ Todos guardados"); cargarResumenAdmin();
+
+function volverPanelAdmin(){ 
+  ocultarTodo(); 
+  document.getElementById("pantallaPanelAdmin").classList.add("pantalla-activa"); 
 }
 function verificarAcceso(){
   var usu=document.getElementById("campoUsuario").value.trim(), cla=document.getElementById("campoClave").value.trim();
   if(!usu||!cla){ mostrarMensaje("mensajeLogin","⚠️ Escribe usuario y contraseña","error"); return; }
-  if(usu==="admin"&&cla===CLAVE_ADMIN){
-    usuarioActual="__admin__"; ocultarTodo(); document.getElementById("sistemaPrincipal").classList.add("pantalla-activa");
-    document.getElementById("usuarioActivo").innerHTML="👤 Usuario: Administrador";
-    document.getElementById("fechaHoy").innerHTML="📅 Fecha: "+fechaActual;
-    document.getElementById("tarifasUsuario").style.display="none";
-    document.getElementById("campoUsuario").value=document.getElementById("campoClave").value=""; return;
-  }
+  
   var u=buscarUsuario(usu);
   if(!u){ mostrarMensaje("mensajeLogin","❌ Usuario no encontrado","error"); return; }
   if(u.clave!==cla){ mostrarMensaje("mensajeLogin","❌ Contraseña incorrecta","error"); return; }
   if(esFechaVencida(u.vence)){ mostrarMensaje("mensajeLogin","⏰ Acceso caducado","error"); return; }
+  
   usuarioActual=usu;
-  tarifasActuales.fijo=Number(u.precioFijo)||75; tarifasActuales.corrido=Number(u.precioCorrido)||25;
-  tarifasActuales.posicion=Number(u.multiPosicion)||5; tarifasActuales.parle=Number(u.factorParle)||1100;
-  ocultarTodo(); document.getElementById("sistemaPrincipal").classList.add("pantalla-activa");
+  tarifasActuales.fijo=Number(u.precioFijo)||75; 
+  tarifasActuales.corrido=Number(u.precioCorrido)||25;
+  tarifasActuales.posicion=Number(u.multiPosicion)||5; 
+  tarifasActuales.parle=Number(u.factorParle)||1100;
+  
+  ocultarTodo(); 
+  document.getElementById("sistemaPrincipal").classList.add("pantalla-activa");
   document.getElementById("usuarioActivo").innerHTML="👤 Usuario: "+usu;
   document.getElementById("fechaHoy").innerHTML="📅 Fecha: "+fechaActual;
   document.getElementById("tarifasUsuario").style.display="block";
@@ -645,7 +585,9 @@ function verificarAcceso(){
   document.getElementById("tParle").textContent="$"+tarifasActuales.parle;
   document.getElementById("campoUsuario").value=document.getElementById("campoClave").value="";
 }
+
 function cerrarSesion(){ usuarioActual=null; volverLogin(); }
+
 function guardarUsuario(){
   var usu=document.getElementById("nuevoUsuario").value.trim(), cla=document.getElementById("nuevaClave").value.trim(),
       pf=Number(document.getElementById("precioFijo").value)||75, pc=Number(document.getElementById("precioCorrido").value)||25,
@@ -661,6 +603,7 @@ function guardarUsuario(){
   document.getElementById("multiPosicion").value=5; document.getElementById("factorParle").value=1100;
   document.getElementById("fechaCaducidad").value=""; listarUsuarios();
 }
+
 function listarUsuarios(){
   var lista=obtenerListaUsuarios(), cont=document.getElementById("listaUsuarios"); cont.innerHTML="";
   if(lista.length===0){ cont.innerHTML="<p style='text-align:center;color:#666;'>Sin usuarios.</p>"; return; }
@@ -673,6 +616,7 @@ function listarUsuarios(){
     cont.appendChild(div);
   });
 }
+
 function editarUsuario(nombre){
   var u=buscarUsuario(nombre); if(!u) return;
   document.getElementById("nuevoUsuario").value=u.usuario; document.getElementById("nuevaClave").value=u.clave;
@@ -680,448 +624,441 @@ function editarUsuario(nombre){
   document.getElementById("multiPosicion").value=u.multiPosicion||5; document.getElementById("factorParle").value=u.factorParle||1100;
   document.getElementById("fechaCaducidad").value=u.vence; window.scrollTo({top:0,behavior:'smooth'});
 }
+
 function borrarUsuario(nombre){ if(!confirm(`⚠️ ¿Eliminar "${nombre}"?`)) return; guardarListaUsuarios(obtenerListaUsuarios().filter(u=>u.usuario!==nombre)); listarUsuarios(); }
+
 function claveConUsuario(clave){ return (usuarioActual||"admin")+"_"+clave; }
 function obtenerClave(){ return claveConUsuario("bolita_lista_"+fechaActual+"_"+jornadaActual); }
-function claveResultados(){ return claveConUsuario("bolita_resultados_"+fechaActual); }
-function claveResumen(fecha){ return claveConUsuario("bolita_resumen_"+fecha); }
 function claveListaFechaJornada(fecha,jornada){ return claveConUsuario("bolita_lista_"+fecha+"_"+jornada); }
-function volverInicio(){ ocultarTodo(); document.getElementById("sistemaPrincipal").classList.add("pantalla-activa"); }
+
+function volverInicio(){ ocultarTodo(); document.getElementById("sistemaPrincipal").classList.add("pantalla-activa"); calcularTotalDia(); }
 function abrirLista(jornada){ jornadaActual=jornada; ocultarTodo(); document.getElementById("pantallaLista").classList.add("pantalla-activa"); document.getElementById("tituloLista").innerHTML="🎱 LISTA "+jornada; document.getElementById("fechaLista").innerHTML="📅 Fecha: "+fechaActual; document.getElementById("tipo").value="fijo"; cambiarTipo(); cargarLista(); }
 function cargarLista(){ jugadas=[]; var d=cargarDato(obtenerClave()); if(d){try{var g=JSON.parse(d);if(Array.isArray(g))jugadas=g;}catch(e){}} mostrarJugadas(); }
-function guardarLista(){ guardarDatoJSON(obtenerClave(), jugadas); }
+
+function guardarLista(){
+  var clave = obtenerClave();
+  guardarDato(clave, JSON.stringify(jugadas));
+  var totalJornada = 0;
+  for(var i = 0; i < jugadas.length; i++){
+    var j = jugadas[i];
+    if(j.tipo === "posicion"){
+      totalJornada += (Number(j.primera) || 0) + (Number(j.segunda) || 0) + (Number(j.tercera) || 0);
+    } else {
+      totalJornada += Number(j.monto) || 0;
+    }
+  }
+  var claveTotal;
+  if(jornadaActual === "mañana") claveTotal = "total_mañana_" + fechaActual;
+  else if(jornadaActual === "noche") claveTotal = "total_noche_" + fechaActual;
+  if(claveTotal) guardarDato(claveTotal, totalJornada);
+  var elemRecog = document.getElementById("totalRecogidoJornada");
+  var elemCobro = document.getElementById("cobroJornada");
+  var elemEntreg = document.getElementById("entregarJornada");
+  var cobro = totalJornada * 0.20;
+  var entregar = totalJornada - cobro;
+  if(elemRecog) elemRecog.textContent = totalJornada.toFixed(2);
+  if(elemCobro) elemCobro.textContent = cobro.toFixed(2);
+  if(elemEntreg) elemEntreg.textContent = entregar.toFixed(2);
+  calcularTotalJornada();
+}
+
 function cambiarTipo(){ var t=document.getElementById("tipo").value; document.getElementById("camposNormal").style.display="none"; document.getElementById("camposPosicion").style.display="none"; document.getElementById("camposParle").style.display="none"; if(t==="fijo"||t==="corrido")document.getElementById("camposNormal").style.display="block"; if(t==="posicion")document.getElementById("camposPosicion").style.display="block"; if(t==="parle")document.getElementById("camposParle").style.display="block"; }
+
 function agregarJugada(){
   var t=document.getElementById("tipo").value;
   if(t==="fijo"||t==="corrido"){ var n=document.getElementById("numero").value.trim(), m=document.getElementById("monto").value; if(n===""||m===""){alert("Pon número y monto.");return;} jugadas.push({tipo:t,numero:n,monto:Number(m)}); document.getElementById("numero").value=document.getElementById("monto").value=""; }
   else if(t==="posicion"){ var n=document.getElementById("numeroPosicion").value.trim(), p=document.getElementById("montoPrimera").value, s=document.getElementById("montoSegunda").value, tt=document.getElementById("montoTercera").value; if(n===""){alert("Pon el número.");return;} if(p===""&&s===""&&tt===""){alert("Pon al menos un monto.");return;} jugadas.push({tipo:"posicion",numero:n,primera:Number(p||0),segunda:Number(s||0),tercera:Number(tt||0)}); document.getElementById("numeroPosicion").value=document.getElementById("montoPrimera").value=document.getElementById("montoSegunda").value=document.getElementById("montoTercera").value=""; }
   else if(t==="parle"){ var txt=document.getElementById("numerosParle").value.trim(), m=document.getElementById("montoParle").value; if(txt===""||m===""){alert("Pon números y monto.");return;} var partes=txt.split(","), nums=[]; for(var i=0;i<partes.length;i++){var x=partes[i].trim();if(x)nums.push(x);} if(nums.length<2){alert("Parlé necesita al menos 2 números.");return;} jugadas.push({tipo:"parle",numeros:nums,monto:Number(m)}); document.getElementById("numerosParle").value=document.getElementById("montoParle").value=""; }
-  guardarLista(); mostrarJugadas();
+  guardarLista(); mostrarJugadas(); calcularTotalJornada();
 }
+
 function mostrarJugadas(){
-  var c=document.getElementById("jugadas"); c.innerHTML=""; var tot=0;
+  var c=document.getElementById("jugadas"); c.innerHTML="";
   for(var i=0;i<jugadas.length;i++){
     var j=jugadas[i], d=document.createElement("div"); d.className="jugada";
-    if(j.tipo==="fijo"){ tot+=Number(j.monto); d.innerHTML="<div class='jugada-titulo'>🎯 FIJO</div>Número: <b>"+j.numero+"</b><br>Monto: $"+Number(j.monto).toFixed(2); }
-    else if(j.tipo==="corrido"){ tot+=Number(j.monto); d.innerHTML="<div class='jugada-titulo'>🏃 CORRIDO</div>Número: <b>"+j.numero+"</b><br>Monto: $"+Number(j.monto).toFixed(2); }
-    else if(j.tipo==="posicion"){ tot+=Number(j.primera)+Number(j.segunda)+Number(j.tercera); d.innerHTML="<div class='jugada-titulo'>📍 POSICIÓN</div>Número: <b>"+j.numero+"</b><br>🥇 $"+Number(j.primera).toFixed(2)+" 🥈 $"+Number(j.segunda).toFixed(2)+" 🥉 $"+Number(j.tercera).toFixed(2); }
-    else if(j.tipo==="parle"){ tot+=Number(j.monto); d.innerHTML="<div class='jugada-titulo'>🔗 PARLÉ</div>Números: <b>"+j.numeros.join(" - ")+"</b><br>Monto: $"+Number(j.monto).toFixed(2); }
+    if(j.tipo==="fijo"){ d.innerHTML="<div class='jugada-titulo'>🎯 FIJO</div>Número: <b>"+j.numero+"</b><br>Monto: $"+Number(j.monto).toFixed(2); }
+    else if(j.tipo==="corrido"){ d.innerHTML="<div class='jugada-titulo'>🏃 CORRIDO</div>Número: <b>"+j.numero+"</b><br>Monto: $"+Number(j.monto).toFixed(2); }
+    else if(j.tipo==="posicion"){ d.innerHTML="<div class='jugada-titulo'>📍 POSICIÓN</div>Número: <b>"+j.numero+"</b><br>🥇 $"+Number(j.primera).toFixed(2)+" 🥈 $"+Number(j.segunda).toFixed(2)+" 🥉 $"+Number(j.tercera).toFixed(2); }
+    else if(j.tipo==="parle"){ d.innerHTML="<div class='jugada-titulo'>🔗 PARLÉ</div>Números: <b>"+j.numeros.join(" - ")+"</b><br>Monto: $"+Number(j.monto).toFixed(2); }
     var b=document.createElement("button"); b.className="eliminar"; b.innerHTML="🗑️ ELIMINAR"; b.setAttribute("data-i",i); b.onclick=function(){ eliminarJugada(Number(this.getAttribute("data-i"))); }; d.appendChild(b); c.appendChild(d);
+    calcularTotalJornada(); // ← ESTA LÍNEA ES LA QUE FALTA
   }
-  document.getElementById("total").innerHTML=tot.toFixed(2);
 }
-function eliminarJugada(i){ if(!confirm("¿Eliminar esta jugada?")) return; jugadas.splice(i,1); guardarLista(); mostrarJugadas(); }
-function borrarTodaLaLista(){ if(jugadas.length===0){alert("Lista vacía.");return;} if(!confirm("⚠️ ¿Borrar TODAS las jugadas de "+jornadaActual+"?")) return; jugadas=[]; localStorage.removeItem(obtenerClave()); mostrarJugadas(); alert("✅ Lista borrada."); }
-function abrirResultados(){ ocultarTodo(); document.getElementById("pantallaResultados").classList.add("pantalla-activa"); document.getElementById("fechaResultados").innerHTML="📅 Fecha: "+fechaActual; cargarResultados(); }
-function guardarResultados(){
-  var f=document.getElementById("fijo").value.trim(), c1=document.getElementById("corrido1").value.trim(), c2=document.getElementById("corrido2").value.trim();
-  if(f===""||c1===""||c2===""){alert("Pon los 3 números.");return;}
-  guardarDatoJSON(claveResultados(), {fijo:f,corrido1:c1,corrido2:c2}); alert("✅ Resultados guardados.");
-}
-function cargarResultados(){ var d=cargarDato(claveResultados()); if(!d)return; try{var r=JSON.parse(d); document.getElementById("fijo").value=r.fijo||""; document.getElementById("corrido1").value=r.corrido1||""; document.getElementById("corrido2").value=r.corrido2||"";}catch(e){} }
-function abrirCalculo(){ ocultarTodo(); document.getElementById("pantallaCalculo").classList.add("pantalla-activa"); document.getElementById("fechaCalculo").innerHTML="📅 Fecha: "+fechaActual; calcularFijos(); calcularCorridos(); calcularPosicion(); calcularParle(); }
-function calcularFijos(){
-  var c=document.getElementById("premiosFijos"); c.innerHTML="";
-  var dr=cargarDato(claveResultados()); if(!dr){c.innerHTML="<div class='sin-premio'>⚠️ Primero guarda los resultados.</div>"; return 0;}
-  var r; try{r=JSON.parse(dr);}catch(e){return 0;}
-  var gan=String(r.fijo).trim(), tot=0, html="", dias=["Mañana","Noche"];
-  for(var a=0;a<dias.length;a++){
-    var cl=claveListaFechaJornada(fechaActual,dias[a]), dats=cargarDato(cl); if(!dats)continue;
-    var lista; try{lista=JSON.parse(dats);}catch(e){continue;} if(!Array.isArray(lista))continue;
-    for(var i=0;i<lista.length;i++){
-      var j=lista[i]; if(j.tipo!=="fijo")continue;
-      if(String(j.numero).trim()===gan){ var monto=Number(j.monto), pago=monto*tarifasActuales.fijo; tot+=pago; html+="<div class='premio'>✅ "+dias[a]+" — Número "+j.numero+" — Apuesta: $"+monto.toFixed(2)+" → Pago: $"+pago.toFixed(2)+"</div>"; }
-    }
-  }
-  if(html==="")html="<div class='sin-premio'>Ningún acierto en Fijos.</div>"; else html+="<div class='premio-total'>💰 TOTAL A PAGAR: $"+tot.toFixed(2)+"</div>";
-  c.innerHTML=html; return tot;
-}
-function calcularCorridos(){
-  var c=document.getElementById("premiosCorridos"); c.innerHTML="";
-  var dr=cargarDato(claveResultados()); if(!dr){c.innerHTML="<div class='sin-premio'>⚠️ Primero guarda los resultados.</div>"; return 0;}
-  var r; try{r=JSON.parse(dr);}catch(e){return 0;}
-  var c1=String(r.corrido1).trim(), c2=String(r.corrido2).trim(), tot=0, html="", dias=["Mañana","Noche"];
-  for(var a=0;a<dias.length;a++){
-    var cl=claveListaFechaJornada(fechaActual,dias[a]), dats=cargarDato(cl); if(!dats)continue;
-    var lista; try{lista=JSON.parse(dats);}catch(e){continue;} if(!Array.isArray(lista))continue;
-    for(var i=0;i<lista.length;i++){
-      var j=lista[i]; if(j.tipo!=="corrido")continue;
-      var n=String(j.numero).trim(), monto=Number(j.monto);
-      if(n===c1||n===c2){ var pago=monto*tarifasActuales.corrido; tot+=pago; html+="<div class='premio'>✅ "+dias[a]+" — Número "+j.numero+" — Apuesta: $"+monto.toFixed(2)+" → Pago: $"+pago.toFixed(2)+"</div>"; }
-    }
-  }
-  if(html==="")html="<div class='sin-premio'>Ningún acierto en Corridos.</div>"; else html+="<div class='premio-total'>💰 TOTAL A PAGAR: $"+tot.toFixed(2)+"</div>";
-  c.innerHTML=html; return tot;
-}
-function calcularPosicion(){
-  var c=document.getElementById("premiosPosicion"); c.innerHTML="";
-  var dr=cargarDato(claveResultados()); if(!dr){c.innerHTML="<div class='sin-premio'>⚠️ Primero guarda los resultados.</div>"; return 0;}
-  var r; try{r=JSON.parse(dr);}catch(e){return 0;}
-  var p1=String(r.fijo).trim(), p2=String(r.corrido1).trim(), p3=String(r.corrido2).trim(), tot=0, html="", dias=["Mañana","Noche"];
-  for(var a=0;a<dias.length;a++){
-    var cl=claveListaFechaJornada(fechaActual,dias[a]), dats=cargarDato(cl); if(!dats)continue;
-    var lista; try{lista=JSON.parse(dats);}catch(e){continue;} if(!Array.isArray(lista))continue;
-    for(var i=0;i<lista.length;i++){
-      var j=lista[i]; if(j.tipo!=="posicion")continue;
-      var n=String(j.numero).trim();
-      if(n===p1&&j.primera>0){ var pago=j.primera*tarifasActuales.posicion; tot+=pago; html+="<div class='premio'>🥇 "+dias[a]+" — Número "+j.numero+" 1.ª — $"+j.primera.toFixed(2)+" → $"+pago.toFixed(2)+"</div>"; }
-      if(n===p2&&j.segunda>0){ var pago=j.segunda*tarifasActuales.posicion; tot+=pago; html+="<div class='premio'>🥈 "+dias[a]+" — Número "+j.numero+" 2.ª — $"+j.segunda.toFixed(2)+" → $"+pago.toFixed(2)+"</div>"; }
-      if(n===p3&&j.tercera>0){ var pago=j.tercera*tarifasActuales.posicion; tot+=pago; html+="<div class='premio'>🥉 "+dias[a]+" — Número "+j.numero+" 3.ª — $"+j.tercera.toFixed(2)+" → $"+pago.toFixed(2)+"</div>"; }
-    }
-  }
-  if(html==="")html="<div class='sin-premio'>Ningún acierto en Posición.</div>"; else html+="<div class='premio-total'>💰 TOTAL A PAGAR: $"+tot.toFixed(2)+"</div>";
-  c.innerHTML=html; return tot;
-}
-function calcularParle(){
-  var c=document.getElementById("premiosParle"); c.innerHTML="";
-  var dr=cargarDato(claveResultados()); if(!dr){c.innerHTML="<div class='sin-premio'>⚠️ Primero guarda los resultados.</div>"; return 0;}
-  var r; try{r=JSON.parse(dr);}catch(e){return 0;}
-  var res=[String(r.fijo).trim(),String(r.corrido1).trim(),String(r.corrido2).trim()], tot=0, html="", dias=["Mañana","Noche"];
-  for(var a=0;a<dias.length;a++){
-    var cl=claveListaFechaJornada(fechaActual,dias[a]), dats=cargarDato(cl); if(!dats)continue;
-   var lista; try{lista=JSON.parse(dats);}catch(e){continue;} if(!Array.isArray(lista))continue;
-    for(var i=0;i<lista.length;i++){
-      var j=lista[i]; if(j.tipo!=="parle")continue;
-      var todosAciertan=true;
-      for(var k=0;k<j.numeros.length;k++){ if(!res.includes(String(j.numeros[k]).trim())){ todosAciertan=false; break; } }
-      if(todosAciertan){ var pago=Number(j.monto)*tarifasActuales.parle; tot+=pago; html+="<div class='premio'>✅ "+dias[a]+" — Parlé con "+j.numeros.length+" aciertos — Apuesta: $"+Number(j.monto).toFixed(2)+" → Pago: $"+pago.toFixed(2)+"</div>"; }
-    }
-  }
-  if(html==="")html="<div class='sin-premio'>Ningún Parlé acertado.</div>"; else html+="<div class='premio-total'>💰 TOTAL A PAGAR: $"+tot.toFixed(2)+"</div>";
-  c.innerHTML=html; return tot;
-}
-function calcularResumen(){
-  var fi=Number(document.getElementById("fondoInicial").value)||0;
-  var tr=0, tp=0, dias=["Mañana","Noche"];
-  for(var a=0;a<dias.length;a++){
-    var cl=claveListaFechaJornada(fechaActual,dias[a]), dats=cargarDato(cl);
-    if(dats){ try{var lista=JSON.parse(dats); if(Array.isArray(lista)){ for(var i=0;i<lista.length;i++){ var j=lista[i]; if(j.tipo==="fijo"||j.tipo==="corrido")tr+=Number(j.monto); else if(j.tipo==="posicion")tr+=Number(j.primera)+Number(j.segunda)+Number(j.tercera); else if(j.tipo==="parle")tr+=Number(j.monto); } } }catch(e){} }
-  }
-  tp=calcularFijos()+calcularCorridos()+calcularPosicion()+calcularParle();
-  var aj=Number(document.getElementById("ajusteManual").value)||0;
-  var res=fi+tr-tp+aj;
-  document.getElementById("totalRecogido").value=tr.toFixed(2);
-  document.getElementById("totalPagado").value=tp.toFixed(2);
-  document.getElementById("gananciaPerdida").textContent=(res>=0?"+":"")+res.toFixed(2);
-  document.getElementById("gananciaPerdida").className=res>=0?"ganancia":"perdida";
-  document.getElementById("fondoSiguiente").textContent=res.toFixed(2);
-}
-function guardarResumen(){
-  calcularResumen();
-  var fi=document.getElementById("fondoInicial").value, tr=document.getElementById("totalRecogido").value, tp=document.getElementById("totalPagado").value, aj=document.getElementById("ajusteManual").value;
-  guardarDatoJSON(claveResumen(fechaActual), {fecha:fechaActual,fondoInicial:fi,totalRecogido:tr,totalPagado:tp,ajuste:aj});
-  alert("✅ Resumen guardado.");
-}
-function abrirResumen(){ ocultarTodo(); document.getElementById("pantallaResumen").classList.add("pantalla-activa"); document.getElementById("fechaResumen").innerHTML="📅 Fecha: "+fechaActual; cargarResumenActual(); }
-function cargarResumenActual(){
-  var d=cargarDato(claveResumen(fechaActual));
-  if(d){ try{var r=JSON.parse(d); document.getElementById("fondoInicial").value=r.fondoInicial||""; document.getElementById("totalRecogido").value=r.totalRecogido||""; document.getElementById("totalPagado").value=r.totalPagado||""; document.getElementById("ajusteManual").value=r.ajuste||""; calcularResumen(); }catch(e){} }
-  else { document.getElementById("fondoInicial").value=""; document.getElementById("totalRecogido").value=""; document.getElementById("totalPagado").value=""; document.getElementById("ajusteManual").value="0"; calcularResumen(); }
-}
-function abrirHistorial(){ ocultarTodo(); document.getElementById("pantallaHistorial").classList.add("pantalla-activa"); document.getElementById("fechaBuscar").value=fechaActual; listarFechasGuardadas(); }
-function listarFechasGuardadas(){
-  var cont=document.getElementById("listaFechas"); cont.innerHTML="<p>Función de historial en desarrollo.</p>";
-}
-function cargarFechaEspecifica(){
-  var f=document.getElementById("fechaBuscar").value; if(!f){alert("Selecciona fecha.");return;}
-  fechaActual=f; volverInicio(); alert("📅 Fecha cargada: "+f);
-}
-vigilarConexion();
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(function(registration) {
-        console.log('Service Worker registrado ✅');
-      })
-      .catch(function(error) {
-        console.log('Error en Service Worker:', error);
-      });
-  });
+function calcularTotalJornada(){
+  var total = 0;
+  for(var i = 0; i < jugadas.length; i++){
+    var j = jugadas[i];
+    if(j.tipo === "posicion"){
+      total += (Number(j.primera) || 0) + (Number(j.segunda) || 0) + (Number(j.tercera) || 0);
+    } else {
+      total += Number(j.monto) || 0;
+    }
+  }
+  var cobro = total * 0.20;
+  var entregar = total - cobro;
+  var elemRecog = document.getElementById("totalRecogidoJornada");
+  var elemCobro = document.getElementById("cobroJornada");
+  var elemEntreg = document.getElementById("entregarJornada");
+  if(elemRecog) elemRecog.textContent = total.toFixed(2);
+  if(elemCobro) elemCobro.textContent = cobro.toFixed(2);
+  if(elemEntreg) elemEntreg.textContent = entregar.toFixed(2);
+  var clave;
+  if(jornadaActual === "mañana") clave = "total_mañana_" + fechaActual;
+  else if(jornadaActual === "noche") clave = "total_noche_" + fechaActual;
+  if(clave){ guardarDato(clave, total); }
+  calcularTotalDia();
 }
-// Subir pendientes automáticamente cuando vuelva el internet
-window.addEventListener('online', subirPendientes);
-// También revisar al abrir la página
-subirPendientes();
-// ==== CONTABILIDAD DIARIA ====
+
+function calcularTotalDia(){
+  var totalMan = Number(cargarDato("total_mañana_" + fechaActual)) || 0;
+  var totalNoc = Number(cargarDato("total_noche_" + fechaActual)) || 0;
+  var totalRecogido = totalMan + totalNoc;
+  var cobro
+  var totalMan = Number(cargarDato("total_mañana_" + fechaActual)) || 0;
+  var totalNoc = Number(cargarDato("total_noche_" + fechaActual)) || 0;
+  var totalRecogido = totalMan + totalNoc;
+  var cobroTotal = totalRecogido * 0.20;
+  var entregarTotal = totalRecogido - cobroTotal;
+
+  var elemRecog = document.getElementById("totalRecogidoDia");
+  var elemCobro = document.getElementById("cobroTotalDia");
+  var elemEntreg = document.getElementById("entregarTotalDia");
+
+  if(elemRecog) elemRecog.textContent = totalRecogido.toFixed(2);
+  if(elemCobro) elemCobro.textContent = cobroTotal.toFixed(2);
+  if(elemEntreg) elemEntreg.textContent = entregarTotal.toFixed(2);
+}
+
+function guardarTotalDia(){
+  var totalMan = Number(cargarDato("total_mañana_" + fechaActual)) || 0;
+  var totalNoc = Number(cargarDato("total_noche_" + fechaActual)) || 0;
+  var total = totalMan + totalNoc;
+  guardarDato("total_dia_" + fechaActual, total);
+  alert("✅ Resumen del día guardado.");
+}
+
+function eliminarJugada(i){
+  if(!confirm("¿Eliminar esta jugada?")) return;
+  jugadas.splice(i, 1);
+  guardarLista();
+  mostrarJugadas();
+  calcularTotalJornada();
+}
+
+function borrarTodaLaLista(){
+  if(!confirm("⚠️ ¿Borrar TODAS las jugadas de " + jornadaActual + "?")) return;
+  jugadas = [];
+  guardarLista();
+  mostrarJugadas();
+  calcularTotalJornada();
+}
+
+function abrirResultados(){
+  ocultarTodo();
+  document.getElementById("pantallaResultados").classList.add("pantalla-activa");
+  document.getElementById("fechaResultados").value = fechaActual;
+  cargarResultadosPorFecha();
+}
+
+function claveResultadosFecha(fecha){ return "resultados_" + fecha; }
+
+function cargarResultadosPorFecha(){
+  var fecha = document.getElementById("fechaResultados").value;
+  if(!fecha) return;
+  var d = cargarDato(claveResultadosFecha(fecha));
+  if(d){
+    try{
+      var r = JSON.parse(d);
+      document.getElementById("fijoManana").value = r.fijoManana || "";
+      document.getElementById("corrido1Manana").value = r.corrido1Manana || "";
+      document.getElementById("corrido2Manana").value = r.corrido2Manana || "";
+      document.getElementById("fijoNoche").value = r.fijoNoche || "";
+      document.getElementById("corrido1Noche").value = r.corrido1Noche || "";
+      document.getElementById("corrido2Noche").value = r.corrido2Noche || "";
+    }catch(e){}
+  }else{
+    document.getElementById("fijoManana").value = "";
+    document.getElementById("corrido1Manana").value = "";
+    document.getElementById("corrido2Manana").value = "";
+    document.getElementById("fijoNoche").value = "";
+    document.getElementById("corrido1Noche").value = "";
+    document.getElementById("corrido2Noche").value = "";
+  }
+}
+
+function guardarResultados(){
+  var fecha = document.getElementById("fechaResultados").value;
+  var datos = {
+    fecha: fecha,
+    fijoManana: document.getElementById("fijoManana").value.trim(),
+    corrido1Manana: document.getElementById("corrido1Manana").value.trim(),
+    corrido2Manana: document.getElementById("corrido2Manana").value.trim(),
+    fijoNoche: document.getElementById("fijoNoche").value.trim(),
+    corrido1Noche: document.getElementById("corrido1Noche").value.trim(),
+    corrido2Noche: document.getElementById("corrido2Noche").value.trim()
+  };
+  guardarDato(claveResultadosFecha(fecha), JSON.stringify(datos));
+  document.getElementById("mensajeResultados").innerHTML = "<div class='mensaje ok'>✅ Resultados guardados para " + fecha + "</div>";
+  setTimeout(() => { document.getElementById("mensajeResultados").innerHTML = ""; }, 3000);
+}
+
+function abrirPanelCalculo(){
+  ocultarTodo();
+  document.getElementById("pantallaCalculo").classList.add("pantalla-activa");
+  document.getElementById("fechaCalculo").value = fechaActual;
+  document.getElementById("tituloCalculoJornada").textContent = "";
+  document.getElementById("resultadoCalculoJornada").innerHTML = "";
+}
+
+// 1. Estas dos funciones cortas sí van — son los botones
+function calcularMañana(){
+  calcularPremiosPorJornada("mañana");
+}
+
+function calcularNoche(){
+  calcularPremiosPorJornada("noche");
+}
+
+// 2. Y esta es la función grande que hace TODO el cálculo
+function calcularPremiosPorJornada(jornada){
+  var fecha = document.getElementById("fechaCalculo").value;
+  if(!fecha){ alert("Selecciona una fecha"); return; }
+
+  var claveRes = "resultados_" + fecha;
+  var datosRes = cargarDato(claveRes);
+  if(!datosRes){ alert("No hay resultados para esta fecha"); return; }
+
+  var res = JSON.parse(datosRes);
+  var fijoGanador, corrido1Ganador, corrido2Ganador;
+
+  if(jornada === "mañana"){
+    fijoGanador = res.fijoManana;
+    corrido1Ganador = res.corrido1Manana;
+    corrido2Ganador = res.corrido2Manana;
+  }else{
+    fijoGanador = res.fijoNoche;
+    corrido1Ganador = res.corrido1Noche;
+    corrido2Ganador = res.corrido2Noche;
+  }
+
+  if(!fijoGanador && !corrido1Ganador && !corrido2Ganador){
+    alert("No hay números ganadores para esta jornada"); return;
+  }
+
+  document.getElementById("tituloCalculoJornada").textContent =
+    (jornada === "mañana" ? "🌅" : "🌙") + " JORNADA DE " + jornada.toUpperCase() +
+    " — Fijo: " + (fijoGanador||"—") +
+    " | Corrido 1: " + (corrido1Ganador||"—") +
+    " | Corrido 2: " + (corrido2Ganador||"—");
+
+  var listaUsuarios = obtenerListaUsuarios();
+  var html = "";
+  var totalGeneralPremios = 0;
+
+  for(var u = 0; u < listaUsuarios.length; u++){
+    var usuario = listaUsuarios[u].usuario;
+    var tarifas = listaUsuarios[u];
+    var claveLista = usuario + "_bolita_lista_" + fecha + "_" + jornada;
+    var datosLista = cargarDato(claveLista);
+    if(!datosLista) continue;
+
+    var jugadasUsuario = JSON.parse(datosLista);
+    var totalPremiosUsuario = 0;
+    html += "<div style='margin:10px 0; padding:10px; background:#f5f5f5; border-radius:8px;'>";
+    html += "<h4 style='margin:0 0 8px 0;'>👤 " + usuario + "</h4>";
+
+    for(var j = 0; j < jugadasUsuario.length; j++){
+      var jugada = jugadasUsuario[j];
+      var premio = 0;
+      var textoPremio = "";
+
+      // 🎯 Fijo
+      if(jugada.tipo === "fijo" && jugada.numero === fijoGanador){
+        premio = Number(jugada.monto) * Number(tarifas.precioFijo || 75);
+        textoPremio = "🎯 Fijo: $" + jugada.monto + " × " + (tarifas.precioFijo||75) + " = $" + premio.toFixed(2);
+      }
+      // 🏃 Corrido
+      else if(jugada.tipo === "corrido"){
+        if(jugada.numero === corrido1Ganador || jugada.numero === corrido2Ganador){
+          premio = Number(jugada.monto) * Number(tarifas.precioCorrido || 25);
+          textoPremio = "🏃 Corrido: $" + jugada.monto + " × " + (tarifas.precioCorrido||25) + " = $" + premio.toFixed(2);
+        }
+      }
+      // 📍 Posición
+      else if(jugada.tipo === "posicion"){
+        if(jugada.numero === fijoGanador){
+          var p1 = Number(jugada.primera||0) * Number(tarifas.multiPosicion||5);
+          var p2 = Number(jugada.segunda||0) * Number(tarifas.multiPosicion||5);
+          var p3 = Number(jugada.tercera||0) * Number(tarifas.multiPosicion||5);
+          premio = p1 + p2 + p3;
+          textoPremio = "📍 Posición: $" + premio.toFixed(2);
+        }
+      }
+      // 🔗 Parlé
+      else if(jugada.tipo === "parle"){
+        var todosAciertan = true;
+        for(var n = 0; n < jugada.numeros.length; n++){
+          var num = jugada.numeros[n];
+          if(num !== fijoGanador && num !== corrido1Ganador && num !== corrido2Ganador){
+            todosAciertan = false;
+            break;
+          }
+        }
+        if(todosAciertan){
+          premio = Number(jugada.monto) * Number(tarifas.factorParle || 1100);
+          textoPremio = "🔗 Parlé: $" + jugada.monto + " × " + (tarifas.factorParle||1100) + " = $" + premio.toFixed(2);
+        }
+      }
+
+      if(premio > 0){
+        totalPremiosUsuario += premio;
+        html += "<div style='padding:4px 8px; margin:2px 0; background:#e8f5e9; border-radius:4px;'>" + textoPremio + "</div>";
+      }
+    }
+
+    if(totalPremiosUsuario > 0){
+      html += "<div style='font-weight:bold; padding:6px; background:#c8e6c9; border-radius:4px; margin-top:6px;'>🏆 Total Premios: $" + totalPremiosUsuario.toFixed(2) + "</div></div>";
+      totalGeneralPremios += totalPremiosUsuario;
+    }else{
+      html += "<div style='color:#666;'>Sin aciertos</div></div>";
+    }
+  }
+
+  if(totalGeneralPremios > 0){
+    html += "<div style='margin-top:15px; padding:15px; background:#222; color:white; border-radius:8px; font-size:20px; font-weight:bold; text-align:center;'>💰 TOTAL PREMIOS A PAGAR: $" + totalGeneralPremios.toFixed(2) + "</div>";
+  }else{
+    html += "<div style='padding:15px; text-align:center; background:#fff3cd; border-radius:8px;'>Ningún acierto en esta jornada</div>";
+  }
+
+  document.getElementById("resultadoCalculoJornada").innerHTML = html;
+}
+
 function irContabilidadDiaria(){
   ocultarTodo();
   document.getElementById("pantallaContabilidad").classList.add("pantalla-activa");
   document.getElementById("fechaContabilidad").value = fechaActual;
-  cargarContabilidad();
+  document.getElementById("fondoInicialCont").value = cargarDato("fondo_inicial_" + fechaActual, "0");
+  recalcularFondoGeneral();
 }
 
-function claveContabilidad(fecha){
-  return "contabilidad_diaria_" + fecha;
-}
-
-function claveFondoGeneral(){
-  return "fondo_general_bolita";
-}
-
-function fechaAnterior(fecha){
-  let d = new Date(fecha);
-  d.setDate(d.getDate() - 1);
-  return d.toISOString().split('T')[0];
+function recalcularFondoGeneral(){
+  var fgAnterior = Number(document.getElementById("fgAnterior").value) || 0;
+  var porc = Number(document.getElementById("porcentajeFG").value) || 0;
+  var gananciaDia = Number(document.getElementById("ganDia").textContent.replace(/[^0-9.\-]/g, "")) || 0;
+  var varFG = 0;
+  if(gananciaDia !== 0 && porc !== 0){
+    varFG = gananciaDia * (porc / 100);
+  }
+  var fgNuevo = fgAnterior + varFG;
+  document.getElementById("varFG").textContent = "$" + varFG.toFixed(2);
+  document.getElementById("fgNuevo").textContent = "$" + fgNuevo.toFixed(2);
 }
 
 function cargarContabilidad(){
   var fecha = document.getElementById("fechaContabilidad").value;
   if(!fecha){ alert("Selecciona una fecha"); return; }
-
-  var datos = cargarDatoJSON(claveContabilidad(fecha), null);
-  var fechaAnt = fechaAnterior(fecha);
-  var datosAnt = cargarDatoJSON(claveContabilidad(fechaAnt), null);
-
-  var fiDefecto = 0;
-  //if(datosAnt && datosAnt.fondoFinal) fiDefecto = datosAnt.fondoFinal;
-  if(datos && datos.fondoInicial) fiDefecto = datos.fondoInicial;
-
-  document.getElementById("fondoInicialCont").value = fiDefecto.toFixed(2);
-  document.getElementById("ajusteCont").value = datos && datos.ajuste ? datos.ajuste.toFixed(2) : "0.00";
-  document.getElementById("porcentajeFG").value = datos && datos.porcentajeFG ? datos.porcentajeFG : "10";
-
-  var casillaFg = document.getElementById("fgAnterior");
-var datosHoy = cargarDatoJSON(claveContabilidad(fecha)); // datos de hoy
-
-if (datosHoy && datosHoy.fondoAnterior) {
-  // ✅ Ya trabajamos hoy → muestra lo de hoy, NO cambia nada
-  //casillaFg.value = datosHoy.fondoAnterior;
-} 
-else {
-  // ⏳ Es la primera vez hoy → trae el valor guardado del día anterior
-  var fgGuardado = cargarDato(claveFondoGeneral());
-  //casillaFg.value = fgGuardado ? Number(fgGuardado) : 0;
+  fechaActual = fecha;
+  document.getElementById("fondoInicialCont").value = cargarDato("fondo_inicial_" + fecha, "0");
+  document.getElementById("totalRecMañana").textContent = "$" + (Number(cargarDato("total_mañana_" + fecha)) || 0).toFixed(2);
+  document.getElementById("totalRecNoche").textContent = "$" + (Number(cargarDato("total_noche_" + fecha)) || 0).toFixed(2);
+  calcularResumenContabilidad();
 }
 
-  var usuarios = obtenerListaUsuarios();
-  var htmlM = "", htmlN = "", trM=0, tpM=0, trN=0, tpN=0;
-
-  for(var i=0; i<usuarios.length; i++){
-    var nom = usuarios[i].usuario;
-    var rm = 0, pm = 0, rn = 0, pn = 0;
-    if(datos && datos.usuarios && datos.usuarios[nom]){
-      rm = Number(datos.usuarios[nom].recM)||0;
-      pm = Number(datos.usuarios[nom].pagM)||0;
-      rn = Number(datos.usuarios[nom].recN)||0;
-      pn = Number(datos.usuarios[nom].pagN)||0;
-    }
-    trM += rm; tpM += pm; trN += rn; tpN += pn;
-
-    htmlM += `<div style="display:flex;gap:8px;align-items:center;margin:6px 0;flex-wrap:wrap;">
-      <span style="width:100px;font-weight:bold;">👤 ${nom}</span>
-      <span>Recog:</span>
-      <input type="number" step="0.01" style="width:110px;padding:6px;" id="recM_${nom}" value="${rm.toFixed(2)}" onchange="calcularTodo()">
-      <span>Pag:</span>
-      <input type="number" step="0.01" style="width:110px;padding:6px;" id="pagM_${nom}" value="${pm.toFixed(2)}" onchange="calcularTodo()">
-    </div>`;
-
-    htmlN += `<div style="display:flex;gap:8px;align-items:center;margin:6px 0;flex-wrap:wrap;">
-      <span style="width:100px;font-weight:bold;">👤 ${nom}</span>
-      <span>Recog:</span>
-      <input type="number" step="0.01" style="width:110px;padding:6px;" id="recN_${nom}" value="${rn.toFixed(2)}" onchange="calcularTodo()">
-      <span>Pag:</span>
-      <input type="number" step="0.01" style="width:110px;padding:6px;" id="pagN_${nom}" value="${pn.toFixed(2)}" onchange="calcularTodo()">
-    </div>`;
-  }
-
-  document.getElementById("listaMañana").innerHTML = htmlM;
-  document.getElementById("listaNoche").innerHTML = htmlN;
-  document.getElementById("totalRecMañana").textContent = "$" + trM.toFixed(2);
-  document.getElementById("totalPagMañana").textContent = "$" + tpM.toFixed(2);
-  document.getElementById("totalRecNoche").textContent = "$" + trN.toFixed(2);
-  document.getElementById("totalPagNoche").textContent = "$" + tpN.toFixed(2);
-  calcularTodo();
-  //recalcularFondoGeneral();
-
-}
-
-function calcularTodo(){
-  var usuarios = obtenerListaUsuarios(), trM=0, tpM=0, trN=0, tpN=0;
-  for(var i=0; i<usuarios.length; i++){
-    var nom = usuarios[i].usuario;
-    trM += Number(document.getElementById("recM_"+nom).value)||0;
-    tpM += Number(document.getElementById("pagM_"+nom).value)||0;
-    trN += Number(document.getElementById("recN_"+nom).value)||0;
-    tpN += Number(document.getElementById("pagN_"+nom).value)||0;
-  }
-
-  var fi = Number(document.getElementById("fondoInicialCont").value)||0;
-  var tr = trM + trN;
-  var tp = tpM + tpN;
-  var aj = Number(document.getElementById("ajusteCont").value)||0;
-  var ganDia = tr - tp + aj;
-  var ffDia = fi + ganDia;
+function calcularResumenContabilidad(){
+  var fi = Number(document.getElementById("fondoInicialCont").value) || 0;
+  var tm = Number(cargarDato("total_mañana_" + fechaActual)) || 0;
+  var tn = Number(cargarDato("total_noche_" + fechaActual)) || 0;
+  var tr = tm + tn;
+  var tp = tr * 0.20;
+  var aj = Number(document.getElementById("ajusteCont").value) || 0;
+  var gd = tr - tp + aj;
+  var ff = fi + gd;
 
   document.getElementById("fiResumen").textContent = "$" + fi.toFixed(2);
   document.getElementById("trResumen").textContent = "$" + tr.toFixed(2);
   document.getElementById("tpResumen").textContent = "$" + tp.toFixed(2);
-
-  var elGan = document.getElementById("ganDia");
-  elGan.textContent = (ganDia>=0?"+":"") + "$" + ganDia.toFixed(2);
-  elGan.className = ganDia>=0?"ganancia":"perdida";
-  document.getElementById("ffDia").textContent = ffDia.toFixed(2);
-//var fgActual = Number(document.getElementById("fgAnterior").value) || Number(cargarDato(claveFondoGeneral())) || 0;
-
- // var porc = Number(document.getElementById("porcentajeFG").value)||0;
-  //var varFG = 0;
- // if(ganDia !== 0){
-   // varFG = ganDia * (porc / 100);
-  //  document.getElementById("textoAplicar").textContent = (ganDia>=0?"Ganancia":"Pérdida") + " × " + porc + "%";
- // } else {
-   // document.getElementById("textoAplicar").textContent = "Sin resultado";
-//  }
-//  var fgNuevo = fgActual + varFG;
-  //document.getElementById("fgAnterior").value = fgActual.toFixed(2);
-
-//  document.getElementById("varFG").textContent = (varFG>=0?"+":"") + "$" + varFG.toFixed(2);
- // document.getElementById("fgNuevo").textContent = "$" + fgNuevo.toFixed(2);
-}
-// Recalcula el fondo general SOLO cuando cambias un valor
-// Guardamos los últimos valores para no recalcular si no cambia nada
-var ultimoFgAnt = null;
-var ultimoPorc = null;
-var ultimaGanancia = null;
-
-function recalcularFondoGeneral(){
-  // Leer valores actuales
-  var fgActual = Number(document.getElementById("fgAnterior").value) || 0;
-  var porc = Number(document.getElementById("porcentajeFG").value) || 0;
-  
   var elemGan = document.getElementById("ganDia");
-  var ganDia = 0;
-  if(elemGan){
-    var texto = elemGan.textContent || "";
-    var soloNum = texto.replace(/[^0-9.\-]/g, "");
-    ganDia = Number(soloNum) || 0;
-  }
-
-  // ⛓️ Si nada cambió, NO hagas nada → se acabó la suma duplicada
-  if(fgActual === ultimoFgAnt && 
-     porc === ultimoPorc && 
-     ganDia === ultimaGanancia){
-    return;
-  }
-
-  // Guardar valores actuales como referencia
-  ultimoFgAnt = fgActual;
-  ultimoPorc = porc;
-  ultimaGanancia = ganDia;
-
-  // Calcular y mostrar SOLO si hubo cambio
-  var varFG = 0;
-  if(ganDia !== 0 && porc !== 0){
-    varFG = ganDia * (porc / 100);
-  }
-  var fgNuevo = fgActual + varFG;
-
-  var elemVar = document.getElementById("varFG");
-  var elemNuevo = document.getElementById("fgNuevo");
-  if(elemVar) elemVar.textContent = varFG.toFixed(2);
-  if(elemNuevo) elemNuevo.textContent = fgNuevo.toFixed(2);
+  elemGan.textContent = "$" + gd.toFixed(2);
+  elemGan.className = gd >= 0 ? "ganancia" : "perdida";
+  document.getElementById("ffDia").textContent = ff.toFixed(2);
+  recalcularFondoGeneral();
 }
-
-document.addEventListener("DOMContentLoaded", function(){
-  var casillaAnterior = document.getElementById("fgAnterior");
-  var casillaPorcentaje = document.getElementById("porcentajeFG");
-  if(casillaAnterior) casillaAnterior.addEventListener("blur", recalcularFondoGeneral);
-  if(casillaPorcentaje) casillaPorcentaje.addEventListener("blur", recalcularFondoGeneral);
-});
 
 function guardarContabilidad(){
   var fecha = document.getElementById("fechaContabilidad").value;
-  if(!fecha){ alert("Selecciona una fecha"); return; }
-
-  var usuarios = obtenerListaUsuarios();
-  var datosUsu = {};
-  for(var i=0; i<usuarios.length; i++){
-    var nom = usuarios[i].usuario;
-    datosUsu[nom] = {
-      recM: Number(document.getElementById("recM_"+nom).value)||0,
-      pagM: Number(document.getElementById("pagM_"+nom).value)||0,
-      recN: Number(document.getElementById("recN_"+nom).value)||0,
-      pagN: Number(document.getElementById("pagN_"+nom).value)||0
-    };
-  }
-
-  var fi = Number(document.getElementById("fondoInicialCont").value)||0;
-  var tr = Number(document.getElementById("trResumen").textContent.replace("$",""))||0;
-  var tp = Number(document.getElementById("tpResumen").textContent.replace("$",""))||0;
-  var aj = Number(document.getElementById("ajusteCont").value)||0;
-  var ff = Number(document.getElementById("ffDia").textContent)||0;
-  var porc = Number(document.getElementById("porcentajeFG").value)||0;
-
-  guardarDatoJSON(claveContabilidad(fecha), {
-    fondoInicial: fi, totalRecogido: tr, totalPagado: tp,
-    ajuste: aj, fondoFinal: ff, porcentajeFG: porc, usuarios: datosUsu
-  });
-
-  var fgNuevo = Number(document.getElementById("fgNuevo").textContent.replace("$",""))||0;
-  guardarDato(claveFondoGeneral(), fgNuevo);
-
-  alert("✅ Contabilidad guardada correctamente");
+  guardarDato("fondo_inicial_" + fecha, document.getElementById("fondoInicialCont").value);
+  guardarDato("ajuste_" + fecha, document.getElementById("ajusteCont").value);
+  alert("✅ Contabilidad guardada");
 }
-// ==== EXPORTAR CONTABILIDAD A EXCEL ====
+
+function abrirResumenGeneral(){
+  ocultarTodo();
+  document.getElementById("pantallaResumenGeneral").classList.add("pantalla-activa");
+  document.getElementById("fechaResumenGeneral").value = fechaActual;
+  cargarResumenGeneral();
+}
+
+function cargarResumenGeneral(){
+  var fecha = document.getElementById("fechaResumenGeneral").value;
+  if(!fecha) return;
+  document.getElementById("fondoInicial").value = cargarDato("fondo_inicial_" + fecha, "0");
+  calcularResumenGeneral();
+}
+
+function calcularResumenGeneral(){
+  var fi = Number(document.getElementById("fondoInicial").value) || 0;
+  var tm = Number(cargarDato("total_mañana_" + fechaActual)) || 0;
+  var tn = Number(cargarDato("total_noche_" + fechaActual)) || 0;
+  var tr = tm + tn;
+  var tp = tr * 0.20;
+  var aj = Number(document.getElementById("ajusteManual").value) || 0;
+  var gd = tr - tp + aj;
+  var ff = fi + gd;
+
+  document.getElementById("totalRecogidoDiaResumen").textContent = "$" + tr.toFixed(2);
+  document.getElementById("totalPagadoListeros").textContent = "$" + tp.toFixed(2);
+  document.getElementById("gananciaDia").textContent = "$" + gd.toFixed(2);
+  document.getElementById("fondoFinal").textContent = "$" + ff.toFixed(2);
+}
+
+function guardarResumenGeneral(){
+  var fecha = document.getElementById("fechaResumenGeneral").value;
+  guardarDato("resumen_general_" + fecha, JSON.stringify({
+    fondoInicial: document.getElementById("fondoInicial").value,
+    totalRecogido: document.getElementById("totalRecogidoDiaResumen").textContent,
+    totalPagadoListeros: document.getElementById("totalPagadoListeros").textContent,
+    ajusteManual: document.getElementById("ajusteManual").value,
+    gananciaDia: document.getElementById("gananciaDia").textContent,
+    fondoFinal: document.getElementById("fondoFinal").textContent
+  }));
+  alert("✅ Resumen general guardado");
+}
+
 function exportarContabilidadExcel(){
   var fecha = document.getElementById("fechaContabilidad").value;
-  if(!fecha){ alert("Selecciona una fecha primero"); return; }
-
-  var usuarios = obtenerListaUsuarios();
-  var fi = Number(document.getElementById("fondoInicialCont").value)||0;
-  var trM = 0, tpM = 0, trN = 0, tpN = 0;
-
-  var csv = "Fecha," + fecha + "\n";
-  csv += "Fondo Inicial," + fi.toFixed(2) + "\n\n";
-  csv += "Usuario,Recogido Mañana,Pagado Mañana,Recogido Noche,Pagado Noche\n";
-
-  for(var i=0; i<usuarios.length; i++){
-    var nom = usuarios[i].usuario;
-    var rm = Number(document.getElementById("recM_"+nom).value)||0;
-    var pm = Number(document.getElementById("pagM_"+nom).value)||0;
-    var rn = Number(document.getElementById("recN_"+nom).value)||0;
-    var pn = Number(document.getElementById("pagN_"+nom).value)||0;
-    trM += rm; tpM += pm; trN += rn; tpN += pn;
-    csv += nom + "," + rm.toFixed(2) + "," + pm.toFixed(2) + "," + rn.toFixed(2) + "," + pn.toFixed(2) + "\n";
-  }
-
-  var tr = trM + trN;
-  var tp = tpM + tpN;
-  var aj = Number(document.getElementById("ajusteCont").value)||0;
-  var ganDia = tr - tp + aj;
-  var ffDia = fi + ganDia;
-  var fgAnt = Number(document.getElementById("fgAnterior").textContent.replace("$",""))||0;
-  var porc = Number(document.getElementById("porcentajeFG").value)||0;
-  var varFG = Number(document.getElementById("varFG").textContent.replace("$",""))||0;
-  var fgNuevo = Number(document.getElementById("fgNuevo").textContent.replace("$",""))||0;
-
-  csv += "\n";
-  csv += "TOTALES,,\n";
-  csv += "Total Recogido Mañana," + trM.toFixed(2) + "\n";
-  csv += "Total Pagado Mañana," + tpM.toFixed(2) + "\n";
-  csv += "Total Recogido Noche," + trN.toFixed(2) + "\n";
-  csv += "Total Pagado Noche," + tpN.toFixed(2) + "\n";
-  csv += "Total Recogido General," + tr.toFixed(2) + "\n";
-  csv += "Total Pagado General," + tp.toFixed(2) + "\n";
-  csv += "Ajuste Manual," + aj.toFixed(2) + "\n";
-  csv += "Ganancia/Pérdida del Día," + ganDia.toFixed(2) + "\n";
-  csv += "Fondo Final del Día," + ffDia.toFixed(2) + "\n";
-  csv += "\n";
-  csv += "Fondo General Anterior," + fgAnt.toFixed(2) + "\n";
-  csv += "Porcentaje Aplicado %," + porc + "\n";
-  csv += "Variación Fondo General," + varFG.toFixed(2) + "\n";
-  csv += "Nuevo Fondo General," + fgNuevo.toFixed(2) + "\n";
-
-  var blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+  var datos = "Fecha,Fondo Inicial,Total Recogido Mañana,Total Recogido Noche,Total Recogido Día,Total Pagado Listeros,Ajuste,Ganancia/Pérdida,Fondo Final\n";
+  var fi = Number(document.getElementById("fondoInicialCont").value) || 0;
+  var tm = Number(cargarDato("total_mañana_" + fecha)) || 0;
+  var tn = Number(cargarDato("total_noche_" + fecha)) || 0;
+  var tr = tm + tn;
+  var tp = tr * 0.20;
+  var aj = Number(document.getElementById("ajusteCont").value) || 0;
+  var gd = tr - tp + aj;
+  var ff = fi + gd;
+  datos += fecha + "," + fi.toFixed(2) + "," + tm.toFixed(2) + "," + tn.toFixed(2) + "," + tr.toFixed(2) + "," + tp.toFixed(2) + "," + aj.toFixed(2) + "," + gd.toFixed(2) + "," + ff.toFixed(2);
+  var blob = new Blob([datos], {type: "text/csv;charset=utf-8"});
   var url = URL.createObjectURL(blob);
-  var link = document.createElement("a");
-  link.href = url;
-  link.setAttribute("download", "Contabilidad_" + fecha + ".csv");
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  var a = document.createElement("a");
+  a.href = url; a.download = "Contabilidad_" + fecha + ".csv"; a.click(); URL.revokeObjectURL(url);
 }
 
+document.getElementById("fechaContabilidad").addEventListener("change", cargarContabilidad);
+document.getElementById("ajusteCont").addEventListener("input", calcularResumenContabilidad);
+document.getElementById("fgAnterior").addEventListener("input", recalcularFondoGeneral);
+document.getElementById("porcentajeFG").addEventListener("input", recalcularFondoGeneral);
+
+vigilarConexion();
 </script>
 </body>
 </html>
- 
